@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Authentication Callback - Commit Canvas</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/inter/3.19.3/inter.css" rel="stylesheet">
+    <style>
+        :root {
+            --color-canvas-default: #0d1117;
+            --color-canvas-subtle: #161b22;
+            --color-canvas-inset: #1c2128;
+            --color-border-default: #30363d;
+            --color-border-subtle: #21262d;
+            --color-fg-default: #c9d1d9;
+            --color-fg-muted: #8b949e;
+            --color-fg-subtle: #6e7681;
+            --color-accent-fg: #58a6ff;
+            --color-accent-emphasis: #1f6feb;
+            --color-success-fg: #3fb950;
+            --color-danger-fg: #f85149;
+            --color-btn-primary-bg: #238636;
+            --color-btn-primary-hover-bg: #2ea043;
+            --shadow-floating: 0 8px 24px rgba(1, 4, 9, 0.5);
+            --shadow-subtle: 0 1px 3px rgba(1, 4, 9, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: var(--color-fg-default);
+            background-color: var(--color-canvas-default);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            -webkit-font-smoothing: antialiased;
+            text-rendering: optimizeLegibility;
+        }
+
+        .callback-container {
+            text-align: center;
+            padding: 2.5rem;
+            background-color: var(--color-canvas-subtle);
+            border: 1px solid var(--color-border-default);
+            border-radius: 12px;
+            box-shadow: var(--shadow-floating);
+            max-width: 480px;
+            width: 90%;
+        }
+
+        .loading-spinner {
+            width: 48px;
+            height: 48px;
+            border: 3px solid var(--color-border-subtle);
+            border-top: 3px solid var(--color-success-fg);
+            border-radius: 50%;
+            margin: 1.5rem auto;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .status-message {
+            margin: 1.25rem 0;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--color-fg-default);
+        }
+
+        .error-message {
+            color: var(--color-danger-fg);
+            margin: 1.25rem 0;
+            font-weight: 600;
+            font-size: 1.25rem;
+        }
+
+        .success-message {
+            color: var(--color-success-fg);
+            margin: 1.25rem 0;
+            font-weight: 600;
+            font-size: 1.25rem;
+        }
+
+        .redirect-message {
+            color: var(--color-fg-muted);
+            font-size: 0.875rem;
+        }
+
+        .home-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 1.5rem;
+            padding: 0.75rem 1.5rem;
+            background-color: var(--color-btn-primary-bg);
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid var(--color-border-subtle);
+            box-shadow: var(--shadow-subtle);
+        }
+
+        .home-link:hover {
+            background-color: var(--color-btn-primary-hover-bg);
+            transform: translateY(-1px);
+        }
+
+        .icon {
+            display: block;
+            margin: 0 auto;
+            width: 48px;
+            height: 48px;
+            margin-bottom: 1.5rem;
+        }
+
+        #successView .icon {
+            color: var(--color-success-fg);
+        }
+
+        #errorView .icon {
+            color: var(--color-danger-fg);
+        }
+
+        .callback-view {
+            opacity: 0;
+            transform: translateY(10px);
+            animation: fadeInUp 0.3s ease forwards;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .callback-container {
+                width: calc(100% - 2rem);
+                padding: 2rem 1.5rem;
+            }
+
+            .status-message,
+            .error-message,
+            .success-message {
+                font-size: 1.125rem;
+            }
+
+            .icon {
+                width: 40px;
+                height: 40px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="callback-container">
+        <div id="loadingView" class="callback-view">
+            <div class="loading-spinner"></div>
+            <p class="status-message">Authenticating with GitHub</p>
+            <p class="redirect-message">Please wait while we complete the process...</p>
+        </div>
+
+        <div id="errorView" class="callback-view" style="display: none;">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path
+                    d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" />
+                <path d="M15 9L9 15" />
+                <path d="M9 9L15 15" />
+            </svg>
+            <p class="error-message">Authentication Failed</p>
+            <p class="redirect-message">An error occurred during the authentication process. Please try again.</p>
+            <a href="/" class="home-link">Return to Home</a>
+        </div>
+
+        <div id="successView" class="callback-view" style="display: none;">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path
+                    d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" />
+                <path d="M8 12L11 15L16 9" />
+            </svg>
+            <p class="success-message">Successfully Authenticated!</p>
+            <p class="redirect-message">You'll be redirected to Commit Canvas shortly...</p>
+        </div>
+    </div>
+
+    <script>
+        class CallbackHandler {
+            constructor() {
+                this.loadingView = document.getElementById('loadingView');
+                this.errorView = document.getElementById('errorView');
+                this.successView = document.getElementById('successView');
+            }
+
+            async handleCallback() {
+                try {
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const code = urlParams.get('code');
+                    const error = urlParams.get('error');
+
+                    if (error) {
+                        this.showError();
+                        return;
+                    }
+
+                    if (!code) {
+                        this.showError();
+                        return;
+                    }
+
+                    const response = await fetch('/api/auth/status');
+                    const data = await response.json();
+
+                    if (data.authenticated) {
+                        this.showSuccess();
+                        setTimeout(() => {
+                            window.location.href = '/';
+                        }, 1500);
+                    } else {
+                        this.showError();
+                    }
+                } catch (error) {
+                    console.error('Authentication error:', error);
+                    this.showError();
+                }
+            }
+
+            showError() {
+                this.loadingView.style.display = 'none';
+                this.errorView.style.display = 'block';
+                this.successView.style.display = 'none';
+            }
+
+            showSuccess() {
+                this.loadingView.style.display = 'none';
+                this.errorView.style.display = 'none';
+                this.successView.style.display = 'block';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const callbackHandler = new CallbackHandler();
+            callbackHandler.handleCallback();
+        });
+    </script>
+</body>
+
+</html>
