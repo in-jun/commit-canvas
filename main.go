@@ -281,7 +281,11 @@ func createCommits(c *gin.Context) {
 	var w *git.Worktree
 	var err error
 
-	if repo, err = git.PlainClone(repoPath, false, &git.CloneOptions{URL: remoteURL, Auth: auth}); err != nil {
+	if repo, err = git.PlainClone(repoPath, false, &git.CloneOptions{
+		URL:          remoteURL,
+		Auth:         auth,
+		SingleBranch: false,
+	}); err != nil {
 		if _, _, err = client.Repositories.Get(c, userSession.Username, req.RepoName); err != nil {
 			if _, _, err = client.Repositories.Create(c, "", &github.Repository{
 				Name:        github.String(req.RepoName),
@@ -326,7 +330,7 @@ func createCommits(c *gin.Context) {
 			return
 		}
 
-		if _, err := w.Commit("first commit", &git.CommitOptions{
+		if _, err := w.Commit("Initial commit", &git.CommitOptions{
 			Author: &object.Signature{
 				Name:  userSession.Username,
 				Email: userSession.Email,
@@ -340,12 +344,6 @@ func createCommits(c *gin.Context) {
 		headRef, err := repo.Head()
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("failed to get HEAD: %v", err)})
-			return
-		}
-
-		err = repo.Storer.RemoveReference(plumbing.Master)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("failed to remove master: %v", err)})
 			return
 		}
 
@@ -370,11 +368,25 @@ func createCommits(c *gin.Context) {
 		return
 	}
 
-	w.Checkout(&git.CheckoutOptions{
-		Branch: plumbing.NewBranchReferenceName("commit-canvas"),
-		Create: true,
-		Force:  true,
+	branches, _ := repo.Branches()
+	branchExists := false
+	branches.ForEach(func(branch *plumbing.Reference) error {
+		if branch.Name().String() == "refs/heads/commit-canvas" {
+			branchExists = true
+		}
+		return nil
 	})
+
+	checkoutOpts := &git.CheckoutOptions{
+		Branch: plumbing.NewBranchReferenceName("commit-canvas"),
+		Create: !branchExists,
+		Force:  true,
+	}
+
+	if err := w.Checkout(checkoutOpts); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("failed to checkout: %v", err)})
+		return
+	}
 
 	if err := os.MkdirAll(filepath.Join(repoPath, "commits"), 0755); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("failed to create directory: %v", err)})
