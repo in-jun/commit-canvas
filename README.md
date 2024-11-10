@@ -2,7 +2,7 @@
 
 <div align="center">
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/username/github-commit-canvas)](https://goreportcard.com/report/github.com/username/github-commit-canvas)
+[![Go Report Card](https://goreportcard.com/badge/github.com/in-jun/commit-canvas)](https://goreportcard.com/report/github.com/in-jun/commit-canvas)
 
 > 🎨 GitHub 컨트리뷰션 그래프를 예술적인 캔버스로 변환하는 도구
 
