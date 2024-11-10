@@ -363,11 +363,11 @@ func createCommits(c *gin.Context) {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("failed to push: %v", err)})
 			return
 		}
-	} else {
-		if w, err = repo.Worktree(); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("failed to get worktree: %v", err)})
-			return
-		}
+	}
+
+	if w, err = repo.Worktree(); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("failed to get worktree: %v", err)})
+		return
 	}
 
 	w.Checkout(&git.CheckoutOptions{
