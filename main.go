@@ -64,7 +64,7 @@ func main() {
 			AuthURL:  "https://github.com/login/oauth/authorize",
 			TokenURL: "https://github.com/login/oauth/access_token",
 		},
-		RedirectURL: "http://localhost:8080/callback",
+		RedirectURL: os.Getenv("GITHUB_REDIRECT_URL"),
 	}
 
 	r.GET("/", func(c *gin.Context) {
