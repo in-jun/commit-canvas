@@ -368,13 +368,13 @@ func createCommits(c *gin.Context) {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("failed to get worktree: %v", err)})
 			return
 		}
-
-		w.Checkout(&git.CheckoutOptions{
-			Branch: plumbing.NewBranchReferenceName("commit-canvas"),
-			Create: true,
-			Force:  true,
-		})
 	}
+
+	w.Checkout(&git.CheckoutOptions{
+		Branch: plumbing.NewBranchReferenceName("commit-canvas"),
+		Create: true,
+		Force:  true,
+	})
 
 	if err := os.MkdirAll(filepath.Join(repoPath, "commits"), 0755); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("failed to create directory: %v", err)})
