@@ -395,7 +395,7 @@ func createCommits(c *gin.Context) {
 
 	startDate := time.Now().AddDate(-1, 0, 0)
 	for startDate.Weekday() != time.Sunday {
-		startDate = startDate.AddDate(0, 0, -1)
+		startDate = startDate.AddDate(0, 0, 1)
 	}
 
 	for col := 0; col < len(req.Pattern); col++ {

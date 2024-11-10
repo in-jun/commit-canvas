@@ -868,7 +868,7 @@
                 const startDate = new Date();
                 startDate.setFullYear(startDate.getFullYear() - 1);
                 while (startDate.getDay() !== 0) {
-                    startDate.setDate(startDate.getDate() - 1);
+                    startDate.setDate(startDate.getDate() + 1);
                 }
 
                 const monthLabelsDiv = document.querySelector('.month-labels');
