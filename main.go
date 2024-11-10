@@ -206,7 +206,7 @@ func getContributions(c *gin.Context) {
 	to := time.Now()
 	from := to.AddDate(-1, 0, 0)
 	for from.Weekday() != time.Sunday {
-		from = from.AddDate(0, 0, -1)
+		from = from.AddDate(0, 0, 1)
 	}
 
 	variables := map[string]interface{}{
