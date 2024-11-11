@@ -203,7 +203,13 @@ func getContributions(c *gin.Context) {
         }
     }`
 
-	to := time.Now()
+	koreanLoc, err := time.LoadLocation("Asia/Seoul")
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("failed to load timezone: %v", err)})
+		return
+	}
+
+	to := time.Now().In(koreanLoc)
 	from := to.AddDate(-1, 0, 0)
 	for from.Weekday() != time.Sunday {
 		from = from.AddDate(0, 0, 1)
@@ -211,7 +217,7 @@ func getContributions(c *gin.Context) {
 
 	variables := map[string]interface{}{
 		"from": from.Format(time.RFC3339),
-		"to":   to.Format(time.RFC3339),
+		"to":   to.Add(time.Hour * 24).Format(time.RFC3339),
 	}
 
 	req, err := client.NewRequest("POST", "graphql", map[string]interface{}{
@@ -330,11 +336,17 @@ func createCommits(c *gin.Context) {
 			return
 		}
 
+		koreanLoc, err := time.LoadLocation("Asia/Seoul")
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("failed to load timezone: %v", err)})
+			return
+		}
+
 		if _, err := w.Commit("Initial commit", &git.CommitOptions{
 			Author: &object.Signature{
 				Name:  userSession.Username,
 				Email: userSession.Email,
-				When:  time.Now(),
+				When:  time.Now().In(koreanLoc),
 			},
 		}); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("failed to commit: %v", err)})
@@ -393,7 +405,13 @@ func createCommits(c *gin.Context) {
 		return
 	}
 
-	startDate := time.Now().AddDate(-1, 0, 0)
+	koreanLoc, err := time.LoadLocation("Asia/Seoul")
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("failed to load timezone: %v", err)})
+		return
+	}
+
+	startDate := time.Now().In(koreanLoc).AddDate(-1, 0, 0)
 	for startDate.Weekday() != time.Sunday {
 		startDate = startDate.AddDate(0, 0, 1)
 	}
