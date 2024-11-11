@@ -203,13 +203,7 @@ func getContributions(c *gin.Context) {
         }
     }`
 
-	koreanLoc, err := time.LoadLocation("Asia/Seoul")
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("failed to load timezone: %v", err)})
-		return
-	}
-
-	to := time.Now().In(koreanLoc)
+	to := time.Now().UTC().Add(time.Hour * 9)
 	from := to.AddDate(-1, 0, 0)
 	for from.Weekday() != time.Sunday {
 		from = from.AddDate(0, 0, 1)
@@ -336,17 +330,11 @@ func createCommits(c *gin.Context) {
 			return
 		}
 
-		koreanLoc, err := time.LoadLocation("Asia/Seoul")
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("failed to load timezone: %v", err)})
-			return
-		}
-
 		if _, err := w.Commit("Initial commit", &git.CommitOptions{
 			Author: &object.Signature{
 				Name:  userSession.Username,
 				Email: userSession.Email,
-				When:  time.Now().In(koreanLoc),
+				When:  time.Now().UTC().Add(time.Hour * 9),
 			},
 		}); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("failed to commit: %v", err)})
@@ -405,13 +393,7 @@ func createCommits(c *gin.Context) {
 		return
 	}
 
-	koreanLoc, err := time.LoadLocation("Asia/Seoul")
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("failed to load timezone: %v", err)})
-		return
-	}
-
-	startDate := time.Now().In(koreanLoc).AddDate(-1, 0, 0)
+	startDate := time.Now().UTC().Add(time.Hour*9).AddDate(-1, 0, 0)
 	for startDate.Weekday() != time.Sunday {
 		startDate = startDate.AddDate(0, 0, 1)
 	}
