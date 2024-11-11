@@ -211,7 +211,7 @@ func getContributions(c *gin.Context) {
 
 	variables := map[string]interface{}{
 		"from": from.Format(time.RFC3339),
-		"to":   to.Add(time.Hour * 24).Format(time.RFC3339),
+		"to":   to.Format(time.RFC3339),
 	}
 
 	req, err := client.NewRequest("POST", "graphql", map[string]interface{}{
