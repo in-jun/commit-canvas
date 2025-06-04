@@ -4,6 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Design artistic patterns in your GitHub contribution graph with Commit Canvas. Create beautiful commit patterns that reflect in your GitHub profile.">
+    <meta name="keywords" content="GitHub, contribution graph, git commits, pattern, canvas, design, profile">
+    <meta name="author" content="Commit Canvas">
     <title>Commit Canvas - Design Your GitHub Contribution Graph</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/inter/3.19.3/inter.css" rel="stylesheet">
     <style>
@@ -818,6 +822,16 @@
                 this.isSubmitting = false;
                 this.weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
                 this.months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                this.userTimezone = this.detectTimezone();
+            }
+
+            detectTimezone() {
+                try {
+                    return Intl.DateTimeFormat().resolvedOptions().timeZone;
+                } catch (error) {
+                    console.warn('Failed to detect timezone, using UTC:', error);
+                    return 'UTC';
+                }
             }
 
             init() {
@@ -974,7 +988,10 @@
 
             async fetchContributions() {
                 try {
-                    const response = await fetch('/api/contributions');
+                    const url = new URL('/api/contributions', window.location.origin);
+                    url.searchParams.set('timezone', this.userTimezone);
+
+                    const response = await fetch(url);
                     if (!response.ok) throw new Error('Failed to fetch contributions');
                     this.contributions = await response.json();
                     this.renderGrid();
@@ -1014,10 +1031,14 @@
                 try {
                     const response = await fetch('/api/commits', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Timezone': this.userTimezone
+                        },
                         body: JSON.stringify({
                             pattern: this.pattern,
-                            repoName: repoName
+                            repoName: repoName,
+                            timezone: this.userTimezone
                         })
                     });
 
@@ -1026,10 +1047,16 @@
                         throw new Error(error.error || 'Failed to create pattern');
                     }
 
+                    const result = await response.json();
                     this.repoNameInput.value = '';
                     this.pattern = Array(53).fill().map(() => Array(7).fill(false));
                     await this.fetchContributions();
-                    this.showFlashMessage('Pattern created successfully! Check your GitHub profile.');
+
+                    let message = 'Pattern created successfully! Check your GitHub profile.';
+                    if (result.repository) {
+                        message += ` Repository: ${result.repository}`;
+                    }
+                    this.showFlashMessage(message);
 
                 } catch (error) {
                     this.showFlashMessage(error.message, 'error');

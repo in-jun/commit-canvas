@@ -1,181 +1,323 @@
-# GitHub Commit Canvas
+# Commit Canvas
 
 <div align="center">
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/in-jun/commit-canvas)](https://goreportcard.com/report/github.com/in-jun/commit-canvas)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![GitHub Release](https://img.shields.io/github/release/in-jun/commit-canvas.svg)](https://github.com/in-jun/commit-canvas/releases)
 
-> 🎨 GitHub 컨트리뷰션 그래프를 캔버스로 변환하는 도구
+> 🎨 Turn your GitHub contribution graph into a canvas for artistic expression
+
+Transform your GitHub contribution graph into beautiful patterns and designs. Create meaningful art with your commits while maintaining a professional developer profile.
+
+[**🚀 Try it now**](https://commit-canvas.ijw.app) | [**📖 Documentation**](#documentation) | [**🤝 Contributing**](#contributing)
 
 </div>
 
 ---
 
-## 📋 목차
-
-- [Features](#-features)
-- [Getting Started](#-getting-started)
-  - [Prerequisites](#prerequisites)
-  - [Installation](#installation)
-- [Usage](#-usage)
-  - [Quick Start](#quick-start)
-  - [Examples](#examples)
-- [Tech Stack](#-tech-stack)
-- [Precautions](#️-precautions)
-- [Troubleshooting](#-troubleshooting)
-- [FAQs](#-faqs)
-
----
-
 ## ✨ Features
 
-GitHub Commit Canvas는 GitHub 컨트리뷰션 그래프에 원하는 패턴을 그릴 수 있게 해주는 웹 애플리케이션입니다.
+### 🎯 Core Functionality
 
-### 핵심 기능
+- **🔐 Secure Authentication**: GitHub OAuth integration for safe and easy login
+- **📊 Real-time Visualization**: Live preview of your current contribution graph
+- **🎨 Pattern Designer**: Intuitive click-to-design interface for creating custom patterns
+- **⚡ Automated Repository Management**: Automatic repository creation and commit generation
+- **🌍 Global Timezone Support**: Works correctly across all timezones
+- **📱 Responsive Design**: Optimized for desktop and mobile devices
 
-- 🔐 **간편한 인증**
+### 🛡️ Safety & Security
 
-  - GitHub OAuth를 통한 원클릭 로그인
-  - 안전한 사용자 인증 처리
-
-- 📊 **데이터 시각화**
-
-  - 지난 1년간의 컨트리뷰션 데이터 시각화
-  - 실시간 미리보기 지원
-
-- 🎨 **패턴 디자인**
-
-  - 직관적인 캔버스 인터페이스
-  - 커스텀 패턴 디자인 및 적용
-  - 자동 저장 기능
-
-- 🔄 **자동화**
-  - 자동 저장소 생성
-  - 커밋 자동 관리
-  - 패턴 적용 진행률 표시
+- **🔒 OAuth 2.0**: Secure GitHub authentication
+- **🏠 Private Repositories**: Option to create private pattern repositories
+- **🌿 Separate Branch**: Creates commits in a dedicated `commit-canvas` branch
+- **✅ Validation**: Input validation and error handling
+- **🧹 Clean Separation**: Doesn't interfere with your existing repositories
 
 ---
 
-## 🚀 Getting Started
+## 🚀 Quick Start
 
 ### Prerequisites
 
-시작하기 전에 다음 요구사항을 확인하세요:
+- A GitHub account
+- Modern web browser (Chrome, Firefox, Safari, Edge)
+- Internet connection
 
-| 요구사항    | 설명                                     |
-| ----------- | ---------------------------------------- |
-| GitHub 계정 | 유효한 GitHub 계정이 필요합니다          |
-| 웹 브라우저 | 최신 버전의 Chrome, Firefox, Safari 권장 |
-| 인터넷 연결 | 인터넷 연결 필요                |
+### Usage
 
-### Installation
+1. **Visit the Application**
 
-별도의 설치 과정 없이 웹 브라우저에서 바로 사용 가능합니다:
+   ```
+   https://commit-canvas.ijw.app
+   ```
 
-```bash
-# 웹 브라우저에서 접속
-https://commit-canvas.ijw.app
-```
+2. **Authenticate with GitHub**
+
+   - Click "Login with GitHub"
+   - Authorize the application
+   - You'll be redirected back to the canvas
+
+3. **Design Your Pattern**
+
+   - Click on cells in the contribution graph to create your pattern
+   - Use the legend to understand existing vs. new contributions
+   - Preview your design in real-time
+
+4. **Create Your Repository**
+
+   - Enter a unique repository name
+   - Click "Create Pattern"
+   - Wait for the magic to happen ✨
+
+5. **View Your Results**
+   - Check your GitHub profile
+   - Your new pattern will appear in the contribution graph
+   - Share your creative commit art with the world!
 
 ---
 
-## 📖 Usage
+## 🛠️ Technology Stack
 
-### Quick Start
+| Technology      | Purpose            | Version |
+| --------------- | ------------------ | ------- |
+| **Go**          | Backend server     | 1.23+   |
+| **Gin**         | Web framework      | v1.10.0 |
+| **go-git**      | Git operations     | v5.12.0 |
+| **go-github**   | GitHub API client  | v45.2.0 |
+| **OAuth2**      | Authentication     | v0.23.0 |
+| **HTML/CSS/JS** | Frontend interface | ES6+    |
+
+---
+
+## 🏗️ Architecture
 
 ```mermaid
-graph LR
-    A[웹사이트 접속] --> B[GitHub 로그인]
-    B --> C[패턴 디자인]
-    C --> D[저장소 이름 입력]
-    D --> E[패턴 생성]
+graph TB
+    A[User Browser] -->|OAuth| B[GitHub]
+    A -->|HTTPS| C[Commit Canvas Server]
+    C -->|GitHub API| B
+    C -->|Git Operations| D[Temporary Repository]
+    D -->|Push| E[GitHub Repository]
+    E -->|Reflects in| F[Contribution Graph]
 ```
 
-1. **웹사이트 접속 및 로그인**
+### Key Components
+
+- **Web Server**: Gin-based HTTP server handling requests
+- **Authentication**: GitHub OAuth 2.0 flow
+- **Pattern Engine**: Converts UI patterns to commit schedules
+- **Git Manager**: Creates and manages repositories and commits
+- **Frontend**: Interactive contribution graph designer
+
+---
+
+## ⚠️ Important Considerations
+
+### GitHub Terms of Service
+
+- This tool creates legitimate commits with real content
+- All commits include proper attribution and timestamps
+- Repositories are created transparently in your account
+- Follows GitHub's guidelines for automated content
+
+### Best Practices
+
+- Use meaningful repository names
+- Don't create excessive patterns (be considerate)
+- Understand that patterns become part of your public profile
+- Consider the impact on your contribution statistics
+
+### Limitations
+
+- Patterns may take up to 24 hours to fully appear due to GitHub caching
+- Limited to 53 weeks of history (GitHub's standard view)
+- Requires public repositories for patterns to be visible in contribution graphs
+- Cannot modify existing commits or repositories
+
+---
+
+## 🔧 Local Development
+
+### Prerequisites
+
+- Go 1.23 or higher
+- Git
+- GitHub OAuth App credentials
+
+### Setup
+
+1. **Clone the repository**
+
+   ```bash
+   git clone https://github.com/in-jun/commit-canvas.git
+   cd commit-canvas
+   ```
+
+2. **Install dependencies**
+
+   ```bash
+   go mod download
+   ```
+
+3. **Set up environment variables**
+
+   ```bash
+   export GITHUB_CLIENT_ID="your_github_client_id"
+   export GITHUB_CLIENT_SECRET="your_github_client_secret"
+   export GITHUB_REDIRECT_URL="http://localhost:8080/callback"
+   export SESSION_SECRET="your_random_session_secret"
+   ```
+
+4. **Run the application**
+
+   ```bash
+   go run main.go
+   ```
+
+5. **Open in browser**
+   ```
+   http://localhost:8080
+   ```
+
+### Docker Deployment
 
 ```bash
-# 브라우저에서 접속
-https://commit-canvas.ijw.app
+# Build the image
+docker build -t commit-canvas .
 
-# GitHub 계정으로 로그인
-```
-
-2. **패턴 생성**
-
-```bash
-# 1. 캔버스에서 패턴 디자인
-# 2. 저장소 이름 입력
-# 3. "Create Pattern" 버튼 클릭
-```
-
-### Examples
-
-**기본 패턴 생성**
-
-```bash
-1. 캔버스에서 셀 클릭하여 패턴 디자인
-2. 저장소 이름: "commit-pattern" 입력
-3. Create Pattern 클릭
+# Run the container
+docker run -p 8080:8080 \
+  -e GITHUB_CLIENT_ID="your_client_id" \
+  -e GITHUB_CLIENT_SECRET="your_client_secret" \
+  -e GITHUB_REDIRECT_URL="your_redirect_url" \
+  -e SESSION_SECRET="your_session_secret" \
+  commit-canvas
 ```
 
 ---
 
-## 🛠 Tech Stack
+## 🔐 Security Features
 
-| 기술              | 용도                 | 버전    |
-| ----------------- | -------------------- | ------- |
-| Gin Web Framework | 백엔드 웹 프레임워크 | v1.9.1  |
-| go-git            | Git 작업 처리        | v5.8.1  |
-| go-github         | GitHub API 연동      | v53.2.0 |
-| oauth2            | OAuth 인증 처리      | v0.13.0 |
-
----
-
-## ⚠️ Precautions
-
-### 사용시 주의사항
-
-| 주의사항          | 설명                                              |
-| ----------------- | ------------------------------------------------- |
-| 컨트리뷰션 그래프 | 공개 프로필의 컨트리뷰션 그래프에 영향을 미칩니다 |
-| GitHub 이용약관   | GitHub의 이용약관을 준수하여 사용해주세요         |
-| 사용 제한         | 과도한 패턴 생성은 자제해주세요                   |
+- **Secure Session Management**: HTTP-only cookies with proper security headers
+- **CSRF Protection**: State parameter validation in OAuth flow
+- **Input Validation**: Server-side validation of all user inputs
+- **Rate Limiting**: Protection against abuse (recommended for production)
+- **Secure Headers**: HTTPS enforcement and security headers
+- **Minimal Permissions**: Only requests necessary GitHub permissions
 
 ---
 
-## 🔍 Troubleshooting
+## 🤝 Contributing
 
-### 공통 문제
+We welcome contributions! Here's how you can help:
 
-**로그인 실패**
+### Types of Contributions
 
-1. GitHub 계정 상태 확인
-2. 브라우저 캐시 삭제
-3. 새 브라우저 창에서 시도
+- 🐛 **Bug Reports**: Found an issue? Let us know!
+- 💡 **Feature Requests**: Have an idea? We'd love to hear it!
+- 🔧 **Code Contributions**: Submit pull requests
+- 📚 **Documentation**: Help improve our docs
+- 🌍 **Translations**: Help make the app accessible worldwide
 
-**패턴 생성 실패**
+### Development Workflow
 
-1. 인터넷 연결상태 확인
+1. **Fork** the repository
+2. **Create** a feature branch (`git checkout -b feature/amazing-feature`)
+3. **Commit** your changes (`git commit -m 'Add amazing feature'`)
+4. **Push** to the branch (`git push origin feature/amazing-feature`)
+5. **Open** a Pull Request
+
+### Code Style
+
+- Follow Go best practices and conventions
+- Use `go fmt` for formatting
+- Add comments for complex logic
+- Include tests for new features
 
 ---
 
-## 💡 FAQs
+## 📊 Project Status
 
-**Q: 생성된 저장소는 삭제할 수 있나요?**
+- ✅ **MVP Complete**: Core functionality implemented
+- ✅ **Security Audit**: Basic security measures in place
+- ✅ **Mobile Support**: Responsive design implemented
+- 🚧 **Enhanced Patterns**: Advanced pattern templates (coming soon)
+- 🚧 **Pattern Sharing**: Community pattern gallery (planned)
+- 🚧 **Analytics**: Pattern performance metrics (planned)
 
-- GitHub에서 직접 저장소 삭제 가능
-- 삭제 후 패턴 재생성 가능
+---
 
-**Q: 패턴이 적용되는데 얼마나 걸리나요?**
+## 🙋‍♂️ FAQ
 
-- 일반적으로 즉시 반영
-- GitHub 캐시로 인해 최대 24시간 소요 가능
+<details>
+<summary><strong>Can I delete repositories created by Commit Canvas?</strong></summary>
+
+Yes! You have full control over repositories created by Commit Canvas. You can delete them directly from your GitHub account at any time. The patterns will disappear from your contribution graph accordingly.
+
+</details>
+
+<details>
+<summary><strong>How long does it take for patterns to appear?</strong></summary>
+
+Patterns typically appear immediately, but GitHub's contribution graph cache may take up to 24 hours to fully update. This is a GitHub limitation, not specific to Commit Canvas.
+
+</details>
+
+<details>
+<summary><strong>Are the commits "real" commits?</strong></summary>
+
+Yes! Commit Canvas creates legitimate Git commits with real content, proper timestamps, and author information. These are not fake or empty commits.
+
+</details>
+
+<details>
+<summary><strong>Can I use this with private repositories?</strong></summary>
+
+While you can create private repositories, contributions to private repositories don't appear in your public contribution graph unless you enable "Private contributions" in your GitHub profile settings.
+
+</details>
+
+<details>
+<summary><strong>Does this violate GitHub's terms of service?</strong></summary>
+
+No. Commit Canvas creates legitimate repositories with real commits and content. All activity is transparent and follows GitHub's guidelines for automated content creation.
+
+</details>
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## 🙏 Acknowledgments
+
+- **GitHub** for providing the excellent API and platform
+- **Go Community** for the amazing ecosystem of libraries
+- **Contributors** who have helped improve this project
+- **Users** who create beautiful art with their commits
+
+---
+
+## 📞 Support
+
+- 🐛 **Bug Reports**: [Create an issue](https://github.com/in-jun/commit-canvas/issues/new?template=bug_report.md)
+- 💡 **Feature Requests**: [Request a feature](https://github.com/in-jun/commit-canvas/issues/new?template=feature_request.md)
+- 💬 **Questions**: [Start a discussion](https://github.com/in-jun/commit-canvas/discussions)
+- 📧 **Contact**: [injun0607@naver.com](mailto:injun0607@naver.com)
 
 ---
 
 <div align="center">
 
-**[맨 위로 올라가기](#github-commit-canvas)**
+**[⬆ Back to Top](#commit-canvas)**
 
 Made with ❤️ by [injun](https://github.com/in-jun)
+
+⭐ **Star this repo if you found it useful!** ⭐
 
 </div>

@@ -215,6 +215,16 @@
                 this.loadingView = document.getElementById('loadingView');
                 this.errorView = document.getElementById('errorView');
                 this.successView = document.getElementById('successView');
+                this.userTimezone = this.detectTimezone();
+            }
+
+            detectTimezone() {
+                try {
+                    return Intl.DateTimeFormat().resolvedOptions().timeZone;
+                } catch (error) {
+                    console.warn('Failed to detect timezone, using UTC:', error);
+                    return 'UTC';
+                }
             }
 
             async handleCallback() {
@@ -233,7 +243,11 @@
                         return;
                     }
 
-                    const response = await fetch('/api/auth/status');
+                    const response = await fetch('/api/auth/status', {
+                        headers: {
+                            'X-Timezone': this.userTimezone
+                        }
+                    });
                     const data = await response.json();
 
                     if (data.authenticated) {
