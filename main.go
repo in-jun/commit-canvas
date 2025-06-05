@@ -228,11 +228,35 @@ func authMiddleware() gin.HandlerFunc {
 
 func getContributions(c *gin.Context) {
 	session := sessions.Default(c)
-	userSession := session.Get("user").(*UserSession)
+	userSessionInterface := session.Get("user")
+	if userSessionInterface == nil {
+		log.Printf("No user session found")
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "No user session"})
+		return
+	}
 
+	userSession, ok := userSessionInterface.(*UserSession)
+	if !ok {
+		log.Printf("Invalid user session type: %T", userSessionInterface)
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid session"})
+		return
+	}
+
+	log.Printf("Processing request for user: %s", userSession.Username)
+
+	// First, let's test basic API access
 	ts := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: userSession.AccessToken})
 	tc := oauth2.NewClient(c, ts)
 	client := github.NewClient(tc)
+
+	// Test basic user access
+	user, _, err := client.Users.Get(c, "")
+	if err != nil {
+		log.Printf("Failed to get user info for contributions: %v", err)
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "GitHub API access failed"})
+		return
+	}
+	log.Printf("Fetching contributions for user: %s", *user.Login)
 
 	// Get timezone preference
 	timezone := c.Query("timezone")
@@ -243,10 +267,15 @@ func getContributions(c *gin.Context) {
 		timezone = "UTC"
 	}
 
+	log.Printf("Processing timezone: %s", timezone)
+
 	loc, err := time.LoadLocation(timezone)
 	if err != nil {
-		log.Printf("Invalid timezone %s, using UTC", timezone)
+		log.Printf("Failed to load timezone %s: %v, using UTC", timezone, err)
 		loc = time.UTC
+		timezone = "UTC"
+	} else {
+		log.Printf("Successfully loaded timezone: %s", timezone)
 	}
 
 	query := `
@@ -277,10 +306,14 @@ func getContributions(c *gin.Context) {
 		from = from.AddDate(0, 0, -1)
 	}
 
+	log.Printf("Date range: from %s to %s (timezone: %s)", from.Format("2006-01-02"), to.Format("2006-01-02"), timezone)
+
 	variables := map[string]interface{}{
 		"from": from.UTC().Format(time.RFC3339),
 		"to":   to.UTC().Format(time.RFC3339),
 	}
+
+	log.Printf("GraphQL variables: %+v", variables)
 
 	req, err := client.NewRequest("POST", "graphql", map[string]interface{}{
 		"query":     query,
@@ -300,39 +333,53 @@ func getContributions(c *gin.Context) {
 		return
 	}
 
+	// Check for GraphQL errors first
+	if errors, exists := response["errors"]; exists {
+		log.Printf("GitHub GraphQL errors: %v", errors)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "GitHub API returned errors"})
+		return
+	}
+
+	// Debug: Check what we actually received
+	if response["data"] == nil {
+		log.Printf("GitHub API returned null data field")
+		c.JSON(http.StatusOK, []ContributionDay{})
+		return
+	}
+
 	// Parse response safely
 	data, ok := response["data"].(map[string]interface{})
 	if !ok {
-		log.Println("Invalid response format: missing data")
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid response format"})
+		log.Printf("GitHub API data field is not a map, type: %T", response["data"])
+		c.JSON(http.StatusOK, []ContributionDay{})
 		return
 	}
 
 	viewer, ok := data["viewer"].(map[string]interface{})
 	if !ok {
-		log.Println("Invalid response format: missing viewer")
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid response format"})
+		log.Printf("Invalid response format: missing viewer")
+		c.JSON(http.StatusOK, []ContributionDay{})
 		return
 	}
 
 	collection, ok := viewer["contributionsCollection"].(map[string]interface{})
 	if !ok {
-		log.Println("Invalid response format: missing contributionsCollection")
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid response format"})
+		log.Printf("Invalid response format: missing contributionsCollection")
+		c.JSON(http.StatusOK, []ContributionDay{})
 		return
 	}
 
 	calendar, ok := collection["contributionCalendar"].(map[string]interface{})
 	if !ok {
-		log.Println("Invalid response format: missing contributionCalendar")
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid response format"})
+		log.Printf("Invalid response format: missing contributionCalendar")
+		c.JSON(http.StatusOK, []ContributionDay{})
 		return
 	}
 
 	weeks, ok := calendar["weeks"].([]interface{})
 	if !ok {
-		log.Println("Invalid response format: missing weeks")
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid response format"})
+		log.Printf("Invalid response format: missing weeks")
+		c.JSON(http.StatusOK, []ContributionDay{})
 		return
 	}
 
@@ -376,7 +423,19 @@ func getContributions(c *gin.Context) {
 
 func createCommits(c *gin.Context) {
 	session := sessions.Default(c)
-	userSession := session.Get("user").(*UserSession)
+	userSessionInterface := session.Get("user")
+	if userSessionInterface == nil {
+		log.Printf("No user session found in createCommits")
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "No user session"})
+		return
+	}
+
+	userSession, ok := userSessionInterface.(*UserSession)
+	if !ok {
+		log.Printf("Invalid user session type in createCommits: %T", userSessionInterface)
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid session"})
+		return
+	}
 
 	var req CommitPattern
 	if err := c.ShouldBindJSON(&req); err != nil {
