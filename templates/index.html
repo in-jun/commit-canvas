@@ -879,10 +879,28 @@
 
             renderGrid() {
                 this.grid.innerHTML = '';
-                const startDate = new Date();
-                startDate.setFullYear(startDate.getFullYear() - 1);
+
+                // Use the same calculation as getCellDate() for consistency
+                const now = new Date();
+                const startDate = new Date(now);
+                startDate.setDate(startDate.getDate() - 364);
+
+                // Adjust to start from Sunday to align with contribution graph
                 while (startDate.getDay() !== 0) {
-                    startDate.setDate(startDate.getDate() + 1);
+                    startDate.setDate(startDate.getDate() - 1);
+                }
+
+                // Double-check we don't exceed 1 year
+                const oneYearMs = 365 * 24 * 60 * 60 * 1000;
+                if (now.getTime() - startDate.getTime() > oneYearMs) {
+                    // Adjust forward to exactly 1 year
+                    startDate.setFullYear(now.getFullYear() - 1);
+                    startDate.setMonth(now.getMonth());
+                    startDate.setDate(now.getDate());
+                    // Re-align to Sunday
+                    while (startDate.getDay() !== 0) {
+                        startDate.setDate(startDate.getDate() + 1);
+                    }
                 }
 
                 const monthLabelsDiv = document.querySelector('.month-labels');
@@ -976,11 +994,29 @@
             }
 
             getCellDate(col, row) {
-                const startDate = new Date();
-                startDate.setFullYear(startDate.getFullYear() - 1);
+                // Use the same calculation as backend: go back 364 days (52 weeks)
+                const now = new Date();
+                const startDate = new Date(now);
+                startDate.setDate(startDate.getDate() - 364);
+
+                // Adjust to start from Sunday to align with contribution graph
                 while (startDate.getDay() !== 0) {
                     startDate.setDate(startDate.getDate() - 1);
                 }
+
+                // Double-check we don't exceed 1 year
+                const oneYearMs = 365 * 24 * 60 * 60 * 1000;
+                if (now.getTime() - startDate.getTime() > oneYearMs) {
+                    // Adjust forward to exactly 1 year
+                    startDate.setFullYear(now.getFullYear() - 1);
+                    startDate.setMonth(now.getMonth());
+                    startDate.setDate(now.getDate());
+                    // Re-align to Sunday
+                    while (startDate.getDay() !== 0) {
+                        startDate.setDate(startDate.getDate() + 1);
+                    }
+                }
+
                 const date = new Date(startDate);
                 date.setDate(date.getDate() + (col * 7) + row);
                 return date;
