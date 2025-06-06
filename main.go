@@ -62,10 +62,10 @@ func parseTimezone(c *gin.Context) string {
 		tz = "UTC"
 	}
 
-	// Validate timezone
+	// Try to validate timezone, but don't fail if timezone data is not available
 	if _, err := time.LoadLocation(tz); err != nil {
-		log.Printf("Invalid timezone %s, using UTC", tz)
-		return "UTC"
+		log.Printf("Timezone %s not available in this environment, will use UTC for calculations", tz)
+		// Return the original timezone name for user display, but we'll handle calculations differently
 	}
 
 	return tz
@@ -269,12 +269,12 @@ func getContributions(c *gin.Context) {
 
 	log.Printf("Processing timezone: %s", timezone)
 
-	loc, err := time.LoadLocation(timezone)
-	if err != nil {
-		log.Printf("Failed to load timezone %s: %v, using UTC", timezone, err)
-		loc = time.UTC
-		timezone = "UTC"
+	// Try to load timezone, but gracefully fallback to UTC if not available
+	loc := time.UTC
+	if location, err := time.LoadLocation(timezone); err != nil {
+		log.Printf("Timezone %s not available in this environment, using UTC for calculations", timezone)
 	} else {
+		loc = location
 		log.Printf("Successfully loaded timezone: %s", timezone)
 	}
 
@@ -296,17 +296,30 @@ func getContributions(c *gin.Context) {
         }
     }`
 
-	// Calculate date range (last 53 weeks from current date in user's timezone)
+	// Calculate date range - ensure it's within GitHub's 1-year limit
 	now := time.Now().In(loc)
 	to := now
-	from := to.AddDate(-1, 0, -7) // Go back 1 year and 1 week to get complete 53 weeks
 
-	// Adjust to start from Sunday
+	// Go back exactly 52 weeks (364 days) to stay well within the 1-year limit
+	from := to.AddDate(0, 0, -364)
+
+	// Adjust 'from' to start from Sunday to align with contribution graph
 	for from.Weekday() != time.Sunday {
 		from = from.AddDate(0, 0, -1)
 	}
 
-	log.Printf("Date range: from %s to %s (timezone: %s)", from.Format("2006-01-02"), to.Format("2006-01-02"), timezone)
+	// Double-check that we don't exceed 1 year
+	if to.Sub(from) > 365*24*time.Hour {
+		// If still over 1 year, adjust 'from' forward to exactly 1 year
+		from = to.AddDate(-1, 0, 0)
+		// Re-align to Sunday
+		for from.Weekday() != time.Sunday {
+			from = from.AddDate(0, 0, 1)
+		}
+	}
+
+	log.Printf("Date range: from %s to %s (duration: %v, timezone: %s)",
+		from.Format("2006-01-02"), to.Format("2006-01-02"), to.Sub(from), timezone)
 
 	variables := map[string]interface{}{
 		"from": from.UTC().Format(time.RFC3339),
@@ -464,10 +477,13 @@ func createCommits(c *gin.Context) {
 		timezone = "UTC"
 	}
 
-	loc, err := time.LoadLocation(timezone)
-	if err != nil {
-		log.Printf("Invalid timezone %s, using UTC", timezone)
-		loc = time.UTC
+	// Try to load timezone, but gracefully fallback to UTC if not available
+	loc := time.UTC
+	if location, err := time.LoadLocation(timezone); err != nil {
+		log.Printf("Timezone %s not available in this environment, using UTC for calculations", timezone)
+	} else {
+		loc = location
+		log.Printf("Successfully loaded timezone: %s", timezone)
 	}
 
 	ts := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: userSession.AccessToken})
@@ -497,6 +513,7 @@ func createCommits(c *gin.Context) {
 
 	var repo *git.Repository
 	var w *git.Worktree
+	var err error
 
 	// Try to clone existing repository
 	if repo, err = git.PlainClone(repoPath, false, &git.CloneOptions{
@@ -658,12 +675,30 @@ Generated on: %s
 		return
 	}
 
-	// Calculate start date (last Sunday of the previous year)
+	// Calculate start date - ensure it aligns with GitHub's contribution graph
+	// and matches the same calculation used in getContributions
 	now := time.Now().In(loc)
-	startDate := now.AddDate(-1, 0, -7) // Go back 1 year and 1 week
+
+	// Go back exactly 52 weeks (364 days) to stay within GitHub's 1-year limit
+	startDate := now.AddDate(0, 0, -364)
+
+	// Adjust 'startDate' to start from Sunday to align with contribution graph
 	for startDate.Weekday() != time.Sunday {
 		startDate = startDate.AddDate(0, 0, -1)
 	}
+
+	// Double-check that we don't exceed 1 year from start to now
+	if now.Sub(startDate) > 365*24*time.Hour {
+		// If still over 1 year, adjust 'startDate' forward to exactly 1 year
+		startDate = now.AddDate(-1, 0, 0)
+		// Re-align to Sunday
+		for startDate.Weekday() != time.Sunday {
+			startDate = startDate.AddDate(0, 0, 1)
+		}
+	}
+
+	log.Printf("Commit date range: from %s to %s (duration: %v)",
+		startDate.Format("2006-01-02"), now.Format("2006-01-02"), now.Sub(startDate))
 
 	// Create commits based on pattern
 	// Pattern is organized as [week][day] where day 0 = Sunday
