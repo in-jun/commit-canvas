@@ -949,7 +949,7 @@
 
                         const level = this.getContributionLevel(contribution);
                         let cellClasses = `grid-cell contribution-level-${level}`;
-                        
+
                         if (isFutureDate) {
                             // Future dates are not selectable and have reduced opacity
                             cellClasses += ' future-date';
@@ -1019,7 +1019,7 @@
                 const date = this.getCellDate(col, row);
                 const today = new Date();
                 today.setHours(23, 59, 59, 999);
-                
+
                 // Don't allow toggling future dates
                 if (date > today) {
                     return;
