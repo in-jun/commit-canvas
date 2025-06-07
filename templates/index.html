@@ -500,6 +500,8 @@
             grid-template-rows: repeat(7, 15px);
             gap: 2px;
             width: fit-content;
+            align-content: start;
+            justify-content: start;
         }
 
         .grid-cell {
@@ -507,10 +509,13 @@
             height: 15px;
             border-radius: 2px;
             background-color: var(--color-calendar-graph-day-bg);
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
             cursor: pointer;
             border: 1px solid rgba(27, 31, 36, 0.06);
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .grid-cell:hover {
@@ -672,11 +677,13 @@
             .card-header {
                 flex-direction: column;
                 padding: 20px;
+                gap: 20px;
             }
 
             .card-actions {
                 width: 100%;
                 flex-direction: column;
+                gap: 12px;
             }
 
             .form-group {
@@ -687,6 +694,11 @@
                 width: 100%;
             }
 
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
             .graph-section {
                 padding: 20px;
             }
@@ -695,6 +707,8 @@
                 padding: 16px;
                 padding-left: 50px;
                 padding-top: 48px;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
             }
 
             .month-labels {
@@ -710,11 +724,13 @@
                 grid-template-columns: repeat(53, 10px);
                 grid-template-rows: repeat(7, 10px);
                 gap: 1px;
+                min-width: 530px;
             }
 
             .month-labels {
                 grid-template-columns: repeat(53, 10px);
                 gap: 1px;
+                min-width: 530px;
             }
 
             .weekday-labels {
@@ -724,6 +740,16 @@
 
             .tooltip {
                 display: none;
+            }
+
+            .graph-legend {
+                flex-direction: column;
+                gap: 16px;
+                text-align: center;
+            }
+
+            .legend-item {
+                justify-content: center;
             }
         }
     </style>
@@ -1017,28 +1043,30 @@
             } renderGrid() {
                 this.grid.innerHTML = '';
 
-                // Calculate start date - same as backend logic
+                // Calculate start date - use exact same logic as backend
                 const now = new Date();
                 let startDate = new Date(now);
 
-                // Find the Sunday of current week
+                // Find the Sunday of current week (same as backend)
                 while (startDate.getDay() !== 0) {
                     startDate.setDate(startDate.getDate() - 1);
                 }
 
-                // Go back 52 weeks from this Sunday
-                startDate.setDate(startDate.getDate() - 364); // 52 weeks = 364 days
+                // Go back exactly 52 weeks (364 days) from this Sunday
+                startDate.setDate(startDate.getDate() - 364);
 
-                // Double-check we don't exceed 1 year
+                // Ensure we don't exceed GitHub's 1-year API limit
                 const oneYearMs = 365 * 24 * 60 * 60 * 1000;
                 if (now.getTime() - startDate.getTime() > oneYearMs) {
-                    startDate.setFullYear(now.getFullYear() - 1);
-                    startDate.setMonth(now.getMonth());
-                    startDate.setDate(now.getDate());
+                    // Adjust to exactly 1 year from now
+                    startDate = new Date(now.getTime() - oneYearMs);
+                    // Re-align to Sunday
                     while (startDate.getDay() !== 0) {
                         startDate.setDate(startDate.getDate() + 1);
                     }
                 }
+
+                console.log(`Grid render: Start date ${startDate.toISOString().split('T')[0]}, End date ${now.toISOString().split('T')[0]}, Duration: ${Math.round((now.getTime() - startDate.getTime()) / (24 * 60 * 60 * 1000))} days`);
 
                 // Render month labels
                 const monthLabelsDiv = document.querySelector('.month-labels');
