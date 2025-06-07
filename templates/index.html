@@ -171,22 +171,26 @@
 
         .demo-grid {
             display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 4px;
+            grid-template-columns: repeat(15, 1fr);
+            grid-template-rows: repeat(7, 1fr);
+            gap: 2px;
             margin: 32px 0;
             padding: 40px;
             background: var(--color-canvas-subtle);
             border-radius: 16px;
             border: 1px solid var(--color-border-default);
             box-shadow: var(--shadow-subtle);
+            justify-content: center;
         }
 
         .demo-cell {
             aspect-ratio: 1;
-            border-radius: 4px;
-            background-color: var(--color-calendar-graph-day-L2-bg);
+            border-radius: 2px;
+            background-color: var(--color-calendar-graph-day-bg);
             animation: pulse 2s infinite;
             transition: transform 0.2s ease;
+            min-width: 15px;
+            min-height: 15px;
         }
 
         @keyframes pulse {
@@ -201,13 +205,27 @@
             }
         }
 
-        .demo-cell:nth-child(2n) {
+        .demo-cell:nth-child(4n+1) {
+            background-color: var(--color-calendar-graph-day-bg);
+        }
+
+        .demo-cell:nth-child(4n+2) {
             animation-delay: 0.5s;
+            background-color: var(--color-calendar-graph-day-L1-bg);
+        }
+
+        .demo-cell:nth-child(4n+3) {
+            animation-delay: 1s;
+            background-color: var(--color-calendar-graph-day-L2-bg);
+        }
+
+        .demo-cell:nth-child(4n) {
+            animation-delay: 1.5s;
             background-color: var(--color-calendar-graph-day-L3-bg);
         }
 
-        .demo-cell:nth-child(3n) {
-            animation-delay: 1s;
+        .demo-cell:nth-child(7n) {
+            animation-delay: 2s;
             background-color: var(--color-calendar-graph-day-L4-bg);
         }
 
@@ -435,29 +453,32 @@
             left: 64px;
             right: 24px;
             height: 32px;
-            display: flex;
+            display: grid;
+            grid-template-columns: repeat(53, 15px);
+            gap: 2px;
         }
 
         .month-label {
-            flex: 1;
             font-size: 12px;
             font-weight: 600;
             color: var(--color-fg-muted);
             text-align: start;
-            padding-left: 4px;
+            align-self: center;
+            white-space: nowrap;
+            overflow: hidden;
         }
 
         .weekday-labels {
             position: absolute;
             left: 12px;
             top: 56px;
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
+            display: grid;
+            grid-template-rows: repeat(7, 15px);
+            gap: 2px;
+            align-content: start;
         }
 
         .weekday-label {
-            height: 15px;
             padding-right: 10px;
             font-size: 12px;
             font-weight: 500;
@@ -465,32 +486,38 @@
             color: var(--color-fg-muted);
             text-align: end;
             width: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: end;
         }
 
         .contribution-grid {
-            display: inline-grid;
-            grid-template-rows: repeat(7, 1fr);
-            gap: 3px;
-        }
-
-        .grid-row {
-            display: flex;
-            gap: 3px;
+            display: grid;
+            grid-template-columns: repeat(53, 15px);
+            grid-template-rows: repeat(7, 15px);
+            gap: 2px;
+            width: fit-content;
         }
 
         .grid-cell {
             width: 15px;
             height: 15px;
-            border-radius: 3px;
+            border-radius: 2px;
             background-color: var(--color-calendar-graph-day-bg);
             transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
             cursor: pointer;
+            border: 1px solid rgba(27, 31, 36, 0.06);
         }
 
         .grid-cell:hover {
             transform: scale(1.2);
             z-index: 1;
+            box-shadow: 0 0 0 1px var(--color-border-default);
+        }
+
+        .grid-cell:active {
+            transform: scale(1.1);
         }
 
         .contribution-level-0 {
@@ -515,10 +542,13 @@
 
         .selection-active {
             background-color: var(--color-selection-bg) !important;
+            border: 1px solid rgba(39, 159, 175, 0.8) !important;
+            box-shadow: 0 0 0 1px rgba(39, 159, 175, 0.3);
         }
 
         .selection-active:hover {
             transform: scale(1.2);
+            box-shadow: 0 0 0 2px rgba(39, 159, 175, 0.5);
         }
 
         .future-date {
@@ -669,12 +699,24 @@
             }
 
             .grid-cell {
-                width: 12px;
-                height: 12px;
+                width: 10px;
+                height: 10px;
             }
 
-            .grid-cell:hover {
-                transform: scale(1.1);
+            .contribution-grid {
+                grid-template-columns: repeat(53, 10px);
+                grid-template-rows: repeat(7, 10px);
+                gap: 1px;
+            }
+
+            .month-labels {
+                grid-template-columns: repeat(53, 10px);
+                gap: 1px;
+            }
+
+            .weekday-labels {
+                grid-template-rows: repeat(7, 10px);
+                gap: 1px;
             }
 
             .tooltip {
@@ -736,6 +778,91 @@
 
             <div class="demo-section">
                 <div class="demo-grid">
+                    <!-- Generate 105 cells (15 columns × 7 rows) for demo -->
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
                     <div class="demo-cell"></div>
                     <div class="demo-cell"></div>
                     <div class="demo-cell"></div>
@@ -802,13 +929,13 @@
                         <div class="graph-container">
                             <div class="month-labels"></div>
                             <div class="weekday-labels">
-                                <div class="weekday-label">Sun</div>
+                                <div class="weekday-label"></div>
                                 <div class="weekday-label">Mon</div>
-                                <div class="weekday-label">Tue</div>
+                                <div class="weekday-label"></div>
                                 <div class="weekday-label">Wed</div>
-                                <div class="weekday-label">Thu</div>
+                                <div class="weekday-label"></div>
                                 <div class="weekday-label">Fri</div>
-                                <div class="weekday-label">Sat</div>
+                                <div class="weekday-label"></div>
                             </div>
                             <div class="contribution-grid" id="contributionGrid"></div>
                         </div>
@@ -914,6 +1041,7 @@
                     }
                 }
 
+                // Render month labels
                 const monthLabelsDiv = document.querySelector('.month-labels');
                 monthLabelsDiv.innerHTML = '';
                 let currentMonth = -1;
@@ -926,15 +1054,15 @@
                         const monthLabel = document.createElement('div');
                         monthLabel.className = 'month-label';
                         monthLabel.textContent = this.months[currentMonth];
+                        monthLabel.style.gridColumn = `${col + 1}`;
                         monthLabelsDiv.appendChild(monthLabel);
                     }
                 }
 
-                for (let row = 0; row < 7; row++) {
-                    const rowDiv = document.createElement('div');
-                    rowDiv.className = 'grid-row';
-
-                    for (let col = 0; col < 53; col++) {
+                // Render contribution cells in correct GitHub layout
+                // GitHub shows: columns = weeks (53), rows = days (7: Sun-Sat)
+                for (let col = 0; col < 53; col++) {
+                    for (let row = 0; row < 7; row++) {
                         const cell = document.createElement('div');
                         const contribution = this.contributions[col * 7 + row];
 
@@ -961,6 +1089,10 @@
                         cell.setAttribute('data-col', col);
                         cell.setAttribute('data-row', row);
 
+                        // Position cell in CSS grid (GitHub layout: columns=weeks, rows=days)
+                        cell.style.gridColumn = `${col + 1}`;
+                        cell.style.gridRow = `${row + 1}`;
+
                         const tooltip = this.createTooltip(cellDate, contribution, this.pattern[col][row], isFutureDate);
                         cell.appendChild(tooltip);
 
@@ -973,10 +1105,25 @@
                             });
                         }
 
-                        rowDiv.appendChild(cell);
-                    }
+                        // Add hover events for tooltip
+                        cell.addEventListener('mouseenter', (e) => {
+                            const tooltip = e.currentTarget.querySelector('.tooltip');
+                            if (tooltip) {
+                                tooltip.style.opacity = '1';
+                                tooltip.style.zIndex = '1000';
+                            }
+                        });
 
-                    this.grid.appendChild(rowDiv);
+                        cell.addEventListener('mouseleave', (e) => {
+                            const tooltip = e.currentTarget.querySelector('.tooltip');
+                            if (tooltip) {
+                                tooltip.style.opacity = '0';
+                                tooltip.style.zIndex = 'auto';
+                            }
+                        });
+
+                        this.grid.appendChild(cell);
+                    }
                 }
             }
 
