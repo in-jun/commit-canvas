@@ -300,13 +300,17 @@ func getContributions(c *gin.Context) {
 	now := time.Now().In(loc)
 	to := now
 
-	// Go back exactly 52 weeks (364 days) to stay well within the 1-year limit
-	from := to.AddDate(0, 0, -364)
+	// Start from current date and go back to find the Sunday that starts the contribution graph
+	from := now
 
-	// Adjust 'from' to start from Sunday to align with contribution graph
+	// Go back 52 weeks from the Sunday of current week
+	// First, find the Sunday of current week
 	for from.Weekday() != time.Sunday {
 		from = from.AddDate(0, 0, -1)
 	}
+
+	// Now go back 52 weeks from this Sunday
+	from = from.AddDate(0, 0, -364) // 52 weeks = 364 days
 
 	// Double-check that we don't exceed 1 year
 	if to.Sub(from) > 365*24*time.Hour {
@@ -679,13 +683,16 @@ Generated on: %s
 	// and matches the same calculation used in getContributions
 	now := time.Now().In(loc)
 
-	// Go back exactly 52 weeks (364 days) to stay within GitHub's 1-year limit
-	startDate := now.AddDate(0, 0, -364)
+	// Start from current date and go back to find the Sunday that starts the contribution graph
+	startDate := now
 
-	// Adjust 'startDate' to start from Sunday to align with contribution graph
+	// Find the Sunday of current week
 	for startDate.Weekday() != time.Sunday {
 		startDate = startDate.AddDate(0, 0, -1)
 	}
+
+	// Now go back 52 weeks from this Sunday
+	startDate = startDate.AddDate(0, 0, -364) // 52 weeks = 364 days
 
 	// Double-check that we don't exceed 1 year from start to now
 	if now.Sub(startDate) > 365*24*time.Hour {

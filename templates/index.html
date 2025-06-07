@@ -882,13 +882,15 @@
 
                 // Use the same calculation as getCellDate() for consistency
                 const now = new Date();
-                const startDate = new Date(now);
-                startDate.setDate(startDate.getDate() - 364);
+                let startDate = new Date(now);
 
-                // Adjust to start from Sunday to align with contribution graph
+                // Find the Sunday of current week
                 while (startDate.getDay() !== 0) {
                     startDate.setDate(startDate.getDate() - 1);
                 }
+
+                // Go back 52 weeks from this Sunday
+                startDate.setDate(startDate.getDate() - 364); // 52 weeks = 364 days
 
                 // Double-check we don't exceed 1 year
                 const oneYearMs = 365 * 24 * 60 * 60 * 1000;
@@ -994,15 +996,17 @@
             }
 
             getCellDate(col, row) {
-                // Use the same calculation as backend: go back 364 days (52 weeks)
+                // Use the same calculation as backend
                 const now = new Date();
-                const startDate = new Date(now);
-                startDate.setDate(startDate.getDate() - 364);
+                let startDate = new Date(now);
 
-                // Adjust to start from Sunday to align with contribution graph
+                // Find the Sunday of current week
                 while (startDate.getDay() !== 0) {
                     startDate.setDate(startDate.getDate() - 1);
                 }
+
+                // Go back 52 weeks from this Sunday
+                startDate.setDate(startDate.getDate() - 364); // 52 weeks = 364 days
 
                 // Double-check we don't exceed 1 year
                 const oneYearMs = 365 * 24 * 60 * 60 * 1000;
