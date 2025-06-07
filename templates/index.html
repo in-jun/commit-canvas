@@ -521,6 +521,15 @@
             transform: scale(1.2);
         }
 
+        .future-date {
+            opacity: 0.3;
+            cursor: not-allowed !important;
+        }
+
+        .future-date:hover {
+            transform: none !important;
+        }
+
         .tooltip {
             position: absolute;
             bottom: calc(100% + 10px);
@@ -929,22 +938,40 @@
                         const cell = document.createElement('div');
                         const contribution = this.contributions[col * 7 + row];
 
-                        const level = this.getContributionLevel(contribution);
-                        cell.className = `grid-cell contribution-level-${level}${this.pattern[col][row] ? ' selection-active' : ''}`;
-                        cell.setAttribute('data-col', col);
-                        cell.setAttribute('data-row', row);
-
+                        // Calculate the actual date for this cell
                         const cellDate = new Date(startDate);
                         cellDate.setDate(cellDate.getDate() + (col * 7) + row);
 
-                        const tooltip = this.createTooltip(cellDate, contribution, this.pattern[col][row]);
+                        // Check if this date is in the future (beyond today)
+                        const today = new Date();
+                        today.setHours(23, 59, 59, 999); // End of today
+                        const isFutureDate = cellDate > today;
+
+                        const level = this.getContributionLevel(contribution);
+                        let cellClasses = `grid-cell contribution-level-${level}`;
+                        
+                        if (isFutureDate) {
+                            // Future dates are not selectable and have reduced opacity
+                            cellClasses += ' future-date';
+                        } else if (this.pattern[col][row]) {
+                            cellClasses += ' selection-active';
+                        }
+
+                        cell.className = cellClasses;
+                        cell.setAttribute('data-col', col);
+                        cell.setAttribute('data-row', row);
+
+                        const tooltip = this.createTooltip(cellDate, contribution, this.pattern[col][row], isFutureDate);
                         cell.appendChild(tooltip);
 
-                        cell.addEventListener('click', (e) => {
-                            const col = parseInt(e.currentTarget.getAttribute('data-col'));
-                            const row = parseInt(e.currentTarget.getAttribute('data-row'));
-                            this.toggleCell(col, row);
-                        });
+                        // Only add click event for non-future dates
+                        if (!isFutureDate) {
+                            cell.addEventListener('click', (e) => {
+                                const col = parseInt(e.currentTarget.getAttribute('data-col'));
+                                const row = parseInt(e.currentTarget.getAttribute('data-row'));
+                                this.toggleCell(col, row);
+                            });
+                        }
 
                         rowDiv.appendChild(cell);
                     }
@@ -963,7 +990,7 @@
                 return 0;
             }
 
-            createTooltip(date, contribution, isSelected) {
+            createTooltip(date, contribution, isSelected, isFutureDate = false) {
                 const tooltip = document.createElement('div');
                 tooltip.className = 'tooltip';
 
@@ -973,11 +1000,15 @@
                     year: 'numeric'
                 })}`;
 
-                if (contribution?.contributionCount > 0) {
-                    content += `\n${contribution.contributionCount} contribution${contribution.contributionCount === 1 ? '' : 's'}`;
-                }
-                if (isSelected) {
-                    content += '\nSelected for new commit';
+                if (isFutureDate) {
+                    content += '\nFuture date';
+                } else {
+                    if (contribution?.contributionCount > 0) {
+                        content += `\n${contribution.contributionCount} contribution${contribution.contributionCount === 1 ? '' : 's'}`;
+                    }
+                    if (isSelected) {
+                        content += '\nSelected for new commit';
+                    }
                 }
 
                 tooltip.textContent = content;
@@ -985,14 +1016,22 @@
             }
 
             toggleCell(col, row) {
+                const date = this.getCellDate(col, row);
+                const today = new Date();
+                today.setHours(23, 59, 59, 999);
+                
+                // Don't allow toggling future dates
+                if (date > today) {
+                    return;
+                }
+
                 this.pattern[col][row] = !this.pattern[col][row];
                 const cell = this.grid.querySelector(`[data-col="${col}"][data-row="${row}"]`);
                 cell.classList.toggle('selection-active');
 
                 const tooltip = cell.querySelector('.tooltip');
-                const date = this.getCellDate(col, row);
                 const contribution = this.contributions[col * 7 + row];
-                tooltip.textContent = this.createTooltip(date, contribution, this.pattern[col][row]).textContent;
+                tooltip.textContent = this.createTooltip(date, contribution, this.pattern[col][row], false).textContent;
             }
 
             getCellDate(col, row) {
