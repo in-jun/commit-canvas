@@ -284,12 +284,15 @@ func getContributions(c *gin.Context) {
             contributionsCollection(from: $from, to: $to) {
                 contributionCalendar {
                     totalContributions
+                    colors
                     weeks {
                         contributionDays {
+                            color
                             contributionCount
                             date
                             weekday
                         }
+                        firstDay
                     }
                 }
             }
