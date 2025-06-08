@@ -11,32 +11,70 @@
     <title>Commit Canvas - Design Your GitHub Contribution Graph</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/inter/3.19.3/inter.css" rel="stylesheet">
     <style>
+        /* Light mode color scheme (GitHub's 2024 theme) */
         :root {
-            --color-canvas-default: #0d1117;
-            --color-canvas-subtle: #161b22;
-            --color-canvas-inset: #1c2128;
-            --color-border-default: #30363d;
-            --color-border-subtle: #21262d;
-            --color-fg-default: #c9d1d9;
-            --color-fg-muted: #8b949e;
-            --color-fg-subtle: #6e7681;
-            --color-accent-fg: #58a6ff;
-            --color-accent-emphasis: #1f6feb;
-            --color-success-fg: #3fb950;
-            --color-danger-fg: #f85149;
-            --color-neutral-muted: rgba(110, 118, 129, 0.4);
-            --color-calendar-graph-day-bg: #161b22;
-            --color-calendar-graph-day-L1-bg: #0e4429;
-            --color-calendar-graph-day-L2-bg: #006d32;
-            --color-calendar-graph-day-L3-bg: #26a641;
-            --color-calendar-graph-day-L4-bg: #39d353;
-            --color-selection-bg: #279faf;
-            --color-btn-primary-bg: #238636;
-            --color-btn-primary-hover-bg: #2ea043;
-            --color-btn-primary-disabled-bg: rgba(35, 134, 54, 0.6);
-            --shadow-resting: 0 1px 0 rgba(1, 4, 9, 0.1);
-            --shadow-floating: 0 8px 24px rgba(1, 4, 9, 0.5);
-            --shadow-subtle: 0 1px 3px rgba(1, 4, 9, 0.3);
+            --color-canvas-default: #ffffff;
+            --color-canvas-subtle: #f6f8fa;
+            --color-canvas-inset: #f6f8fa;
+            --color-border-default: #d1d9e0;
+            --color-border-subtle: #d8dee4;
+            --color-fg-default: #1f2328;
+            --color-fg-muted: #656d76;
+            --color-fg-subtle: #6e7781;
+            --color-accent-fg: #0969da;
+            --color-accent-emphasis: #0969da;
+            --color-success-fg: #1a7f37;
+            --color-danger-fg: #d1242f;
+            --color-neutral-muted: rgba(175, 184, 193, 0.2);
+
+            /* GitHub's exact contribution graph colors for light mode */
+            --color-calendar-graph-day-bg: #ebedf0;
+            --color-calendar-graph-day-L1-bg: #9be9a8;
+            --color-calendar-graph-day-L2-bg: #40c463;
+            --color-calendar-graph-day-L3-bg: #30a14e;
+            --color-calendar-graph-day-L4-bg: #216e39;
+
+            --color-selection-bg: #0969da;
+            --color-btn-primary-bg: #1f883d;
+            --color-btn-primary-hover-bg: #1a7f37;
+            --color-btn-primary-disabled-bg: rgba(31, 136, 61, 0.6);
+            --shadow-resting: 0 1px 0 rgba(31, 35, 40, 0.04);
+            --shadow-floating: 0 16px 32px rgba(31, 35, 40, 0.15);
+            --shadow-subtle: 0 1px 0 rgba(31, 35, 40, 0.04);
+        }
+
+        /* Dark mode color scheme (GitHub's 2024 theme) */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --color-canvas-default: #0d1117;
+                --color-canvas-subtle: #161b22;
+                --color-canvas-inset: #1c2128;
+                --color-border-default: #30363d;
+                --color-border-subtle: #21262d;
+                --color-fg-default: #e6edf3;
+                --color-fg-muted: #7d8590;
+                --color-fg-subtle: #656d76;
+                --color-accent-fg: #2f81f7;
+                --color-accent-emphasis: #1f6feb;
+                --color-success-fg: #3fb950;
+                --color-danger-fg: #f85149;
+                --color-neutral-muted: rgba(110, 118, 129, 0.4);
+
+                /* GitHub's exact contribution graph colors for dark mode */
+                --color-calendar-graph-day-bg: #161b22;
+                --color-calendar-graph-day-L1-bg: #0e4429;
+                --color-calendar-graph-day-L2-bg: #006d32;
+                --color-calendar-graph-day-L3-bg: #26a641;
+                --color-calendar-graph-day-L4-bg: #39d353;
+
+                --color-selection-bg: #1f6feb;
+                --color-btn-primary-bg: #238636;
+                --color-btn-primary-hover-bg: #2ea043;
+                --color-btn-primary-disabled-bg: rgba(35, 134, 54, 0.6);
+                --shadow-resting: 0 1px 0 rgba(1, 4, 9, 0.1);
+                --shadow-floating: 0 8px 24px rgba(1, 4, 9, 0.5);
+                --shadow-subtle: 0 1px 3px rgba(1, 4, 9, 0.3);
+            }
         }
 
         * {
@@ -101,7 +139,7 @@
             line-height: 1.1;
             margin-bottom: 24px;
             letter-spacing: -0.02em;
-            background: linear-gradient(120deg, #39d353 0%, #58a6ff 100%);
+            background: linear-gradient(120deg, var(--color-calendar-graph-day-L4-bg) 0%, var(--color-accent-fg) 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -516,6 +554,9 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            /* Accessibility improvements */
+            outline: 2px solid transparent;
+            outline-offset: 1px;
         }
 
         .grid-cell:hover {
@@ -526,6 +567,17 @@
 
         .grid-cell:active {
             transform: scale(1.1);
+        }
+
+        /* Improved focus styles for accessibility */
+        .grid-cell:focus {
+            outline: 2px solid var(--color-accent-fg);
+            outline-offset: 1px;
+            z-index: 2;
+        }
+
+        .grid-cell:focus-visible {
+            outline: 2px solid var(--color-accent-fg);
         }
 
         .contribution-level-0 {
@@ -988,6 +1040,11 @@
                 this.weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
                 this.months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
                 this.userTimezone = this.detectTimezone();
+
+                // Performance optimization: caches
+                this.dateCache = new Map();
+                this.contributionCache = new Map();
+                this.isLoading = false;
             }
 
             detectTimezone() {
@@ -1121,11 +1178,19 @@
                         cell.setAttribute('data-col', col);
                         cell.setAttribute('data-row', row);
 
+                        // Accessibility attributes
+                        cell.setAttribute('role', 'button');
+                        cell.setAttribute('tabindex', isFutureDate ? '-1' : '0');
+                        cell.setAttribute('aria-label', this.createCellAriaLabel(cellDate, contribution, this.pattern[col][row], isFutureDate));
+                        cell.setAttribute('aria-describedby', `tooltip-${col}-${row}`);
+
                         // Position in CSS grid: GitHub layout
                         cell.style.gridColumn = `${col + 1}`;
                         cell.style.gridRow = `${row + 1}`;
 
                         const tooltip = this.createTooltip(cellDate, contribution, this.pattern[col][row], isFutureDate);
+                        tooltip.id = `tooltip-${col}-${row}`;
+                        tooltip.setAttribute('role', 'tooltip');
                         cell.appendChild(tooltip);
 
                         // Event listeners
@@ -1134,6 +1199,36 @@
                                 const col = parseInt(e.currentTarget.getAttribute('data-col'));
                                 const row = parseInt(e.currentTarget.getAttribute('data-row'));
                                 this.toggleCell(col, row);
+                            });
+
+                            // Keyboard navigation
+                            cell.addEventListener('keydown', (e) => {
+                                const col = parseInt(e.currentTarget.getAttribute('data-col'));
+                                const row = parseInt(e.currentTarget.getAttribute('data-row'));
+
+                                switch (e.key) {
+                                    case 'Enter':
+                                    case ' ':
+                                        e.preventDefault();
+                                        this.toggleCell(col, row);
+                                        break;
+                                    case 'ArrowRight':
+                                        e.preventDefault();
+                                        this.focusCell(col + 1, row);
+                                        break;
+                                    case 'ArrowLeft':
+                                        e.preventDefault();
+                                        this.focusCell(col - 1, row);
+                                        break;
+                                    case 'ArrowDown':
+                                        e.preventDefault();
+                                        this.focusCell(col, row + 1);
+                                        break;
+                                    case 'ArrowUp':
+                                        e.preventDefault();
+                                        this.focusCell(col, row - 1);
+                                        break;
+                                }
                             });
                         }
 
@@ -1166,6 +1261,45 @@
                 if (count >= 5) return 2;
                 if (count > 0) return 1;
                 return 0;
+            }
+
+            createCellAriaLabel(date, contribution, isSelected, isFutureDate) {
+                const dayName = this.weekdays[date.getDay()];
+                const dateStr = date.toLocaleDateString('en-US', {
+                    month: 'long',
+                    day: 'numeric',
+                    year: 'numeric'
+                });
+
+                let label = `${dayName}, ${dateStr}`;
+
+                if (isFutureDate) {
+                    label += ', future date, not selectable';
+                } else {
+                    if (contribution?.contributionCount > 0) {
+                        label += `, ${contribution.contributionCount} contribution${contribution.contributionCount === 1 ? '' : 's'}`;
+                    } else {
+                        label += ', no contributions';
+                    }
+
+                    if (isSelected) {
+                        label += ', selected for new commit';
+                    }
+
+                    label += '. Press Enter or Space to toggle.';
+                }
+
+                return label;
+            }
+
+            focusCell(col, row) {
+                // Ensure coordinates are within bounds
+                if (col < 0 || col >= 53 || row < 0 || row >= 7) return;
+
+                const cell = this.grid.querySelector(`[data-col="${col}"][data-row="${row}"]`);
+                if (cell && cell.getAttribute('tabindex') !== '-1') {
+                    cell.focus();
+                }
             }
 
             createTooltip(date, contribution, isSelected, isFutureDate = false) {
@@ -1210,9 +1344,18 @@
                 const tooltip = cell.querySelector('.tooltip');
                 const contribution = this.contributions[col * 7 + row];
                 tooltip.textContent = this.createTooltip(date, contribution, this.pattern[col][row], false).textContent;
+
+                // Update aria-label for accessibility
+                cell.setAttribute('aria-label', this.createCellAriaLabel(date, contribution, this.pattern[col][row], false));
             }
 
             getCellDate(col, row) {
+                // Performance optimization: use cache for date calculations
+                const cacheKey = `${col}-${row}`;
+                if (this.dateCache.has(cacheKey)) {
+                    return this.dateCache.get(cacheKey);
+                }
+
                 // Use the same calculation as backend
                 const now = new Date();
 
@@ -1227,21 +1370,46 @@
 
                 const date = new Date(startDate);
                 date.setDate(date.getDate() + (col * 7) + row);
+
+                // Cache the result
+                this.dateCache.set(cacheKey, date);
                 return date;
             }
 
             async fetchContributions() {
+                if (this.isLoading) return;
+
+                this.isLoading = true;
+                this.showLoadingState(true);
+
                 try {
                     const url = new URL('/api/contributions', window.location.origin);
                     url.searchParams.set('timezone', this.userTimezone);
 
                     const response = await fetch(url);
                     if (!response.ok) throw new Error('Failed to fetch contributions');
+
                     this.contributions = await response.json();
+
+                    // Cache contribution data for performance
+                    this.contributionCache.clear();
+                    this.contributions.forEach((contrib, index) => {
+                        this.contributionCache.set(index, contrib);
+                    });
+
                     this.renderGrid();
                 } catch (error) {
                     console.error('Failed to fetch contributions:', error);
                     this.showFlashMessage('Failed to load contribution data. Please try refreshing the page.', 'error');
+                } finally {
+                    this.isLoading = false;
+                    this.showLoadingState(false);
+                }
+            }
+
+            showLoadingState(show) {
+                if (show) {
+                    this.grid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: var(--color-fg-muted);">Loading contribution data...</div>';
                 }
             }
 
