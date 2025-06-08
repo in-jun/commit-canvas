@@ -1040,28 +1040,25 @@
                     flashElement.style.opacity = '0';
                     setTimeout(() => flashElement.remove(), 300);
                 }, 4000);
-            }            renderGrid() {
+            } renderGrid() {
                 this.grid.innerHTML = '';
 
                 // Calculate start date - use exact same logic as backend
                 const now = new Date();
-                
-                // Calculate the start date: go back exactly 371 days and find the Sunday
+
+                // Calculate the start date: go back exactly 364 days (52 weeks) and find the Sunday
                 let startDate = new Date(now);
-                startDate.setDate(startDate.getDate() - 371);
-                
+                startDate.setDate(startDate.getDate() - 364);
+
                 // Find the Sunday on or before this date
                 while (startDate.getDay() !== 0) { // 0 = Sunday
                     startDate.setDate(startDate.getDate() - 1);
                 }
-                
-                // End date is the Saturday of the current week  
-                let endSaturday = new Date(now);
-                while (endSaturday.getDay() !== 6) { // 6 = Saturday
-                    endSaturday.setDate(endSaturday.getDate() + 1);
-                }
 
-                console.log(`Grid render: Start date ${startDate.toISOString().split('T')[0]}, End date ${endSaturday.toISOString().split('T')[0]}, Duration: ${Math.round((endSaturday.getTime() - startDate.getTime()) / (24 * 60 * 60 * 1000))} days`);
+                // End date is today
+                let endDate = new Date(now);
+
+                console.log(`Grid render: Start date ${startDate.toISOString().split('T')[0]}, End date ${endDate.toISOString().split('T')[0]}, Duration: ${Math.round((endDate.getTime() - startDate.getTime()) / (24 * 60 * 60 * 1000))} days`);
 
                 // Render month labels
                 const monthLabelsDiv = document.querySelector('.month-labels');
@@ -1218,11 +1215,11 @@
             getCellDate(col, row) {
                 // Use the same calculation as backend
                 const now = new Date();
-                
-                // Calculate the start date: go back exactly 371 days and find the Sunday
+
+                // Calculate the start date: go back exactly 364 days (52 weeks) and find the Sunday
                 let startDate = new Date(now);
-                startDate.setDate(startDate.getDate() - 371);
-                
+                startDate.setDate(startDate.getDate() - 364);
+
                 // Find the Sunday on or before this date
                 while (startDate.getDay() !== 0) { // 0 = Sunday
                     startDate.setDate(startDate.getDate() - 1);
