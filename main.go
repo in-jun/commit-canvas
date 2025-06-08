@@ -297,25 +297,22 @@ func getContributions(c *gin.Context) {
     }`
 
 	// Calculate date range to match GitHub's exact contribution graph
-	// GitHub shows exactly 53 weeks (371 days) ending with today's week
+	// GitHub API only allows up to 1 year (365 days), so we use exactly 365 days
 	now := time.Now().In(loc)
-	
-	// Calculate the start date: go back exactly 371 days and find the Sunday
-	startDate := now.AddDate(0, 0, -371)
-	
+
+	// Calculate the start date: go back exactly 364 days (52 weeks) and find the Sunday
+	startDate := now.AddDate(0, 0, -364)
+
 	// Find the Sunday on or before this date
 	for startDate.Weekday() != time.Sunday {
 		startDate = startDate.AddDate(0, 0, -1)
 	}
-	
-	// End date is the Saturday of the current week  
+
+	// End date is today (to stay within 1 year limit)
 	endDate := now
-	for endDate.Weekday() != time.Saturday {
-		endDate = endDate.AddDate(0, 0, 1)
-	}
-	
+
 	from := startDate
-	to := endDate.AddDate(0, 0, 1) // Include the day after end Saturday for API call
+	to := endDate.AddDate(0, 0, 1) // Include the day after end date for API call
 
 	log.Printf("Date range: from %s to %s (duration: %v, timezone: %s)",
 		from.Format("2006-01-02"), to.Format("2006-01-02"), to.Sub(from), timezone)
@@ -398,10 +395,10 @@ func getContributions(c *gin.Context) {
 	// Parse contribution data directly from GitHub's weeks structure
 	// GitHub returns weeks in chronological order, each with 7 days (Sun-Sat)
 	var contributions []ContributionDay
-	
+
 	// Initialize a map to store GitHub's contribution data by date
 	contributionMap := make(map[string]int)
-	
+
 	// First, extract all contribution data from GitHub response into map
 	for _, week := range weeks {
 		weekData, ok := week.(map[string]interface{})
@@ -708,9 +705,9 @@ Generated on: %s
 	// and matches the same calculation used in getContributions
 	now := time.Now().In(loc)
 
-	// Calculate the start date: go back exactly 371 days and find the Sunday
-	startDate := now.AddDate(0, 0, -371)
-	
+	// Calculate the start date: go back exactly 364 days (52 weeks) and find the Sunday
+	startDate := now.AddDate(0, 0, -364)
+
 	// Find the Sunday on or before this date
 	for startDate.Weekday() != time.Sunday {
 		startDate = startDate.AddDate(0, 0, -1)
