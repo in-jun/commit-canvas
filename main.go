@@ -296,31 +296,26 @@ func getContributions(c *gin.Context) {
         }
     }`
 
-	// Calculate date range - ensure it's within GitHub's 1-year limit
+	// Calculate date range to match GitHub's exact contribution graph
+	// GitHub shows exactly 53 weeks (371 days) ending with today's week
 	now := time.Now().In(loc)
-	to := now
-
-	// Start from current date and go back to find the Sunday that starts the contribution graph
-	from := now
-
-	// Go back 52 weeks from the Sunday of current week
-	// First, find the Sunday of current week
-	for from.Weekday() != time.Sunday {
-		from = from.AddDate(0, 0, -1)
+	
+	// Calculate the start date: go back exactly 371 days and find the Sunday
+	startDate := now.AddDate(0, 0, -371)
+	
+	// Find the Sunday on or before this date
+	for startDate.Weekday() != time.Sunday {
+		startDate = startDate.AddDate(0, 0, -1)
 	}
-
-	// Now go back 52 weeks from this Sunday
-	from = from.AddDate(0, 0, -364) // 52 weeks = 364 days
-
-	// Double-check that we don't exceed 1 year
-	if to.Sub(from) > 365*24*time.Hour {
-		// If still over 1 year, adjust 'from' forward to exactly 1 year
-		from = to.AddDate(-1, 0, 0)
-		// Re-align to Sunday
-		for from.Weekday() != time.Sunday {
-			from = from.AddDate(0, 0, 1)
-		}
+	
+	// End date is the Saturday of the current week  
+	endDate := now
+	for endDate.Weekday() != time.Saturday {
+		endDate = endDate.AddDate(0, 0, 1)
 	}
+	
+	from := startDate
+	to := endDate.AddDate(0, 0, 1) // Include the day after end Saturday for API call
 
 	log.Printf("Date range: from %s to %s (duration: %v, timezone: %s)",
 		from.Format("2006-01-02"), to.Format("2006-01-02"), to.Sub(from), timezone)
@@ -400,7 +395,14 @@ func getContributions(c *gin.Context) {
 		return
 	}
 
+	// Parse contribution data directly from GitHub's weeks structure
+	// GitHub returns weeks in chronological order, each with 7 days (Sun-Sat)
 	var contributions []ContributionDay
+	
+	// Initialize a map to store GitHub's contribution data by date
+	contributionMap := make(map[string]int)
+	
+	// First, extract all contribution data from GitHub response into map
 	for _, week := range weeks {
 		weekData, ok := week.(map[string]interface{})
 		if !ok {
@@ -428,10 +430,33 @@ func getContributions(c *gin.Context) {
 				continue
 			}
 
+			contributionMap[dateStr] = int(contributionCount)
+		}
+	}
+
+	// Now generate the grid exactly as frontend expects: 53 weeks × 7 days
+	// Matching frontend calculation: col * 7 + row
+	for col := 0; col < 53; col++ { // weeks
+		for row := 0; row < 7; row++ { // days (0=Sunday, 6=Saturday)
+			// Calculate the exact date for this grid cell
+			cellDate := from.AddDate(0, 0, col*7+row)
+			dateStr := cellDate.Format("2006-01-02")
+
+			// Get contribution count from GitHub data, default to 0
+			contributionCount := 0
+			if count, exists := contributionMap[dateStr]; exists {
+				contributionCount = count
+			}
+
 			contributions = append(contributions, ContributionDay{
 				Date:              dateStr,
-				ContributionCount: int(contributionCount),
+				ContributionCount: contributionCount,
 			})
+
+			// Debug log for verification (only log some samples)
+			if col%10 == 0 && row == 0 {
+				log.Printf("Grid[%d][%d]: Date %s, Contributions %d", col, row, dateStr, contributionCount)
+			}
 		}
 	}
 
@@ -683,25 +708,12 @@ Generated on: %s
 	// and matches the same calculation used in getContributions
 	now := time.Now().In(loc)
 
-	// Start from current date and go back to find the Sunday that starts the contribution graph
-	startDate := now
-
-	// Find the Sunday of current week
+	// Calculate the start date: go back exactly 371 days and find the Sunday
+	startDate := now.AddDate(0, 0, -371)
+	
+	// Find the Sunday on or before this date
 	for startDate.Weekday() != time.Sunday {
 		startDate = startDate.AddDate(0, 0, -1)
-	}
-
-	// Now go back 52 weeks from this Sunday
-	startDate = startDate.AddDate(0, 0, -364) // 52 weeks = 364 days
-
-	// Double-check that we don't exceed 1 year from start to now
-	if now.Sub(startDate) > 365*24*time.Hour {
-		// If still over 1 year, adjust 'startDate' forward to exactly 1 year
-		startDate = now.AddDate(-1, 0, 0)
-		// Re-align to Sunday
-		for startDate.Weekday() != time.Sunday {
-			startDate = startDate.AddDate(0, 0, 1)
-		}
 	}
 
 	log.Printf("Commit date range: from %s to %s (duration: %v)",
