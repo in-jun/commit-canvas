@@ -27,12 +27,12 @@
             --color-danger-fg: #d1242f;
             --color-neutral-muted: rgba(175, 184, 193, 0.2);
 
-            /* GitHub's exact contribution graph colors for light mode */
-            --color-calendar-graph-day-bg: #ebedf0;
-            --color-calendar-graph-day-L1-bg: #9be9a8;
-            --color-calendar-graph-day-L2-bg: #40c463;
-            --color-calendar-graph-day-L3-bg: #30a14e;
-            --color-calendar-graph-day-L4-bg: #216e39;
+            /* GitHub's exact contribution graph colors for light mode (from guide) */
+            --color-calendar-graph-day-bg: #ebedf0;  /* 기여 없음 */
+            --color-calendar-graph-day-L1-bg: #9be9a8;  /* 1-3 기여 */
+            --color-calendar-graph-day-L2-bg: #40c463;  /* 4-6 기여 */
+            --color-calendar-graph-day-L3-bg: #30a14e;  /* 7-9 기여 */
+            --color-calendar-graph-day-L4-bg: #216e39;  /* 10+ 기여 */
 
             --color-selection-bg: #0969da;
             --color-btn-primary-bg: #1f883d;
@@ -60,12 +60,12 @@
                 --color-danger-fg: #f85149;
                 --color-neutral-muted: rgba(110, 118, 129, 0.4);
 
-                /* GitHub's exact contribution graph colors for dark mode */
-                --color-calendar-graph-day-bg: #161b22;
-                --color-calendar-graph-day-L1-bg: #0e4429;
-                --color-calendar-graph-day-L2-bg: #006d32;
-                --color-calendar-graph-day-L3-bg: #26a641;
-                --color-calendar-graph-day-L4-bg: #39d353;
+                /* GitHub's exact contribution graph colors for dark mode (from guide) */
+                --color-calendar-graph-day-bg: #161b22;  /* 기여 없음 */
+                --color-calendar-graph-day-L1-bg: #0e4429;  /* 1-3 기여 */
+                --color-calendar-graph-day-L2-bg: #006d32;  /* 4-6 기여 */
+                --color-calendar-graph-day-L3-bg: #26a641;  /* 7-9 기여 */
+                --color-calendar-graph-day-L4-bg: #39d353;  /* 10+ 기여 */
 
                 --color-selection-bg: #1f6feb;
                 --color-btn-primary-bg: #238636;
@@ -211,7 +211,7 @@
             display: grid;
             grid-template-columns: repeat(15, 1fr);
             grid-template-rows: repeat(7, 1fr);
-            gap: 2px;
+            gap: 3px;
             margin: 32px 0;
             padding: 40px;
             background: var(--color-canvas-subtle);
@@ -493,7 +493,7 @@
             height: 32px;
             display: grid;
             grid-template-columns: repeat(53, 15px);
-            gap: 2px;
+            gap: 3px;
         }
 
         .month-label {
@@ -515,7 +515,7 @@
             top: 56px;
             display: grid;
             grid-template-rows: repeat(7, 15px);
-            gap: 2px;
+            gap: 3px;
             align-content: start;
         }
 
@@ -536,7 +536,7 @@
             display: grid;
             grid-template-columns: repeat(53, 15px);
             grid-template-rows: repeat(7, 15px);
-            gap: 2px;
+            gap: 3px;
             width: fit-content;
             align-content: start;
             justify-content: start;
@@ -547,37 +547,71 @@
             height: 15px;
             border-radius: 2px;
             background-color: var(--color-calendar-graph-day-bg);
-            transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: transform 0.12s cubic-bezier(0.2, 0, 0.38, 0.9),
+                        background-color 0.15s ease,
+                        box-shadow 0.15s ease,
+                        border-color 0.15s ease;
             position: relative;
             cursor: pointer;
-            border: 1px solid rgba(27, 31, 36, 0.06);
+            border: 1px solid transparent;
             display: flex;
             align-items: center;
             justify-content: center;
             /* Accessibility improvements */
             outline: 2px solid transparent;
-            outline-offset: 1px;
+            outline-offset: 2px;
+            /* Performance optimization */
+            will-change: transform, box-shadow;
+            backface-visibility: hidden;
+            contain: layout style paint;
         }
 
+        /* Performance optimizations for animations */
+        .grid-cell,
+        .selection-active,
+        .tooltip,
+        .flash {
+            contain: layout style paint;
+        }
+
+        /* Improved animation timing */
+        .grid-cell {
+            transition: transform 0.12s cubic-bezier(0.2, 0, 0.38, 0.9),
+                        background-color 0.15s ease,
+                        box-shadow 0.15s ease,
+                        border-color 0.15s ease;
+        }
+
+        /* Enhanced hover effects for better visual feedback */
         .grid-cell:hover {
-            transform: scale(1.2);
-            z-index: 1;
-            box-shadow: 0 0 0 1px var(--color-border-default);
+            animation: cell-hover-pulse 0.6s ease-out;
         }
 
-        .grid-cell:active {
-            transform: scale(1.1);
+        @keyframes cell-hover-pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+            100% { transform: scale(1.15); }
         }
 
-        /* Improved focus styles for accessibility */
+        /* Smooth focus transitions */
         .grid-cell:focus {
-            outline: 2px solid var(--color-accent-fg);
-            outline-offset: 1px;
-            z-index: 2;
+            transition: outline-color 0.15s ease, box-shadow 0.15s ease;
         }
 
-        .grid-cell:focus-visible {
-            outline: 2px solid var(--color-accent-fg);
+        /* Improved selection animation */
+        .selection-active {
+            animation: selection-appear 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes selection-appear {
+            0% { 
+                transform: scale(0.8);
+                opacity: 0.5;
+            }
+            100% { 
+                transform: scale(1.05);
+                opacity: 1;
+            }
         }
 
         .contribution-level-0 {
@@ -602,13 +636,27 @@
 
         .selection-active {
             background-color: var(--color-selection-bg) !important;
-            border: 1px solid rgba(39, 159, 175, 0.8) !important;
-            box-shadow: 0 0 0 1px rgba(39, 159, 175, 0.3);
+            border: 1px solid var(--color-selection-bg) !important;
+            box-shadow: 0 0 0 1px rgba(9, 105, 218, 0.3);
+            transform: scale(1.05);
+            animation: selection-appear 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes selection-appear {
+            0% { 
+                transform: scale(0.8);
+                opacity: 0.7;
+            }
+            100% { 
+                transform: scale(1.05);
+                opacity: 1;
+            }
         }
 
         .selection-active:hover {
-            transform: scale(1.2);
-            box-shadow: 0 0 0 2px rgba(39, 159, 175, 0.5);
+            transform: scale(1.15);
+            box-shadow: 0 4px 12px rgba(39, 159, 175, 0.25), 0 0 0 2px rgba(39, 159, 175, 0.5);
+            border-radius: 3px;
         }
 
         .future-date {
@@ -622,27 +670,29 @@
 
         .tooltip {
             position: absolute;
-            bottom: calc(100% + 10px);
+            bottom: calc(100% + 12px);
             left: 50%;
             transform: translateX(-50%);
-            padding: 8px 12px;
+            padding: 10px 14px;
             font-size: 12px;
             line-height: 1.4;
             white-space: pre-line;
             color: var(--color-fg-default);
             background-color: var(--color-canvas-default);
             border: 1px solid var(--color-border-default);
-            border-radius: 6px;
-            box-shadow: var(--shadow-floating);
+            border-radius: 8px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12), 0 4px 8px rgba(0, 0, 0, 0.08);
             pointer-events: none;
             opacity: 0;
             transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            z-index: 100;
+            z-index: 1000;
+            font-weight: 500;
+            min-width: max-content;
         }
 
         .grid-cell:hover .tooltip {
             opacity: 1;
-            transform: translateX(-50%) translateY(-2px);
+            transform: translateX(-50%) translateY(-4px);
         }
 
         .flash {
@@ -775,19 +825,19 @@
             .contribution-grid {
                 grid-template-columns: repeat(53, 10px);
                 grid-template-rows: repeat(7, 10px);
-                gap: 1px;
+                gap: 2px;
                 min-width: 530px;
             }
 
             .month-labels {
                 grid-template-columns: repeat(53, 10px);
-                gap: 1px;
+                gap: 2px;
                 min-width: 530px;
             }
 
             .weekday-labels {
                 grid-template-rows: repeat(7, 10px);
-                gap: 1px;
+                gap: 2px;
             }
 
             .tooltip {
@@ -965,581 +1015,833 @@
                     <div class="demo-cell"></div>
                     <div class="demo-cell"></div>
                     <div class="demo-cell"></div>
-                </div>
-            </div>
-
-            <section class="cta-section">
-                <h2 class="cta-title">Ready to Make Your Mark?</h2>
-                <p class="cta-description">Join developers worldwide who are creating unique contribution patterns and
-                    bringing creativity to their GitHub profiles.</p>
-                <a href="/login" class="btn btn-primary btn-cta">Get Started with GitHub</a>
-            </section>
-        </div>
-
-        <div id="mainApp" style="display: none;">
-            <div class="container">
-                <div class="main-card">
-                    <div class="card-header">
-                        <div>
-                            <h1 class="card-title">Create Your Contribution Pattern</h1>
-                            <p class="card-description">Design your GitHub contribution graph by clicking on cells. Your
-                                pattern will be created through real commits in a new repository.</p>
-                        </div>
-                        <div class="card-actions">
-                            <div class="form-group">
-                                <label for="repoName" class="form-label">Repository Name</label>
-                                <input type="text" id="repoName" class="form-input"
-                                    placeholder="e.g., my-contribution-art">
-                            </div>
-                            <button id="createPatternButton" class="btn btn-primary">Create Pattern</button>
-                        </div>
-                    </div>
-
-                    <div class="graph-section">
-                        <div class="graph-legend">
-                            <div class="legend-item">
-                                <div class="legend-color legend-existing"></div>
-                                <span>Existing Contributions</span>
-                            </div>
-                            <div class="legend-item">
-                                <div class="legend-color legend-new"></div>
-                                <span>New Pattern</span>
-                            </div>
-                        </div>
-
-                        <div class="graph-container">
-                            <div class="month-labels"></div>
-                            <div class="weekday-labels">
-                                <div class="weekday-label"></div>
-                                <div class="weekday-label">Mon</div>
-                                <div class="weekday-label"></div>
-                                <div class="weekday-label">Wed</div>
-                                <div class="weekday-label"></div>
-                                <div class="weekday-label">Fri</div>
-                                <div class="weekday-label"></div>
-                            </div>
-                            <div class="contribution-grid" id="contributionGrid"></div>
-                        </div>
-                        <div id="flashMessage"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </main>
-
-    <script>
-        class CommitCanvas {
-            constructor() {
-                this.pattern = Array(53).fill().map(() => Array(7).fill(false));
-                this.contributions = [];
-                this.grid = document.getElementById('contributionGrid');
-                this.repoNameInput = document.getElementById('repoName');
-                this.createButton = document.getElementById('createPatternButton');
-                this.flashMessage = document.getElementById('flashMessage');
-                this.isSubmitting = false;
-                this.weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-                this.months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-                this.userTimezone = this.detectTimezone();
-
-                // Performance optimization: caches
-                this.dateCache = new Map();
-                this.contributionCache = new Map();
-                this.isLoading = false;
-            }
-
-            detectTimezone() {
-                try {
-                    return Intl.DateTimeFormat().resolvedOptions().timeZone;
-                } catch (error) {
-                    console.warn('Failed to detect timezone, using UTC:', error);
-                    return 'UTC';
-                }
-            }
-
-            init() {
-                this.setupEventListeners();
-                this.fetchContributions();
-            }
-
-            setupEventListeners() {
-                this.createButton.addEventListener('click', () => this.createPattern());
-                this.repoNameInput.addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter') {
-                        e.preventDefault();
-                        this.createPattern();
-                    }
-                });
-                this.grid.addEventListener('mouseleave', () => {
-                    document.querySelectorAll('.tooltip').forEach(tooltip => tooltip.style.opacity = '0');
-                });
-            }
-
-            showFlashMessage(message, type = 'success') {
-                const flashElement = document.createElement('div');
-                flashElement.className = `flash flash-${type}`;
-
-                const icon = document.createElement('svg');
-                icon.setAttribute('width', '16');
-                icon.setAttribute('height', '16');
-                icon.setAttribute('viewBox', '0 0 16 16');
-                icon.setAttribute('fill', 'currentColor');
-
-                icon.innerHTML = type === 'success'
-                    ? '<path fill-rule="evenodd" d="M8 16A8 8 0 108 0a8 8 0 00016zm3.78-9.72a.75.75 0 00-1.06-1.06L6.75 9.19 5.28 7.72a.75.75 0 00-1.06 1.06l2 2a.75.75 0 001.06 0l4.5-4.5z"/>'
-                    : '<path fill-rule="evenodd" d="M8 16A8 8 0 108 0a8 8 0 000 16zM3.293 4.707a1 1 0 011.414 0L8 8l3.293-3.293a1 1 0 111.414 1.414L9.414 9.414l3.293 3.293a1 1 0 01-1.414 1.414L8 10.414l-3.293 3.293a1 1 0 01-1.414-1.414l3.293-3.293L3.293 6.121a1 1 0 010-1.414z"/>';
-
-                flashElement.appendChild(icon);
-                flashElement.appendChild(document.createTextNode(message));
-                this.flashMessage.innerHTML = '';
-                this.flashMessage.appendChild(flashElement);
-
-                setTimeout(() => {
-                    flashElement.style.opacity = '0';
-                    setTimeout(() => flashElement.remove(), 300);
-                }, 4000);
-            } renderGrid() {
-                this.grid.innerHTML = '';
-
-                // Calculate start date - use exact same logic as backend
-                const now = new Date();
-
-                // Calculate the start date: go back exactly 364 days (52 weeks) and find the Sunday
-                let startDate = new Date(now);
-                startDate.setDate(startDate.getDate() - 364);
-
-                // Find the Sunday on or before this date
-                while (startDate.getDay() !== 0) { // 0 = Sunday
-                    startDate.setDate(startDate.getDate() - 1);
-                }
-
-                // End date is today
-                let endDate = new Date(now);
-
-                console.log(`Grid render: Start date ${startDate.toISOString().split('T')[0]}, End date ${endDate.toISOString().split('T')[0]}, Duration: ${Math.round((endDate.getTime() - startDate.getTime()) / (24 * 60 * 60 * 1000))} days`);
-
-                // Render month labels
-                const monthLabelsDiv = document.querySelector('.month-labels');
-                monthLabelsDiv.innerHTML = '';
-                let currentMonth = -1;
-
-                for (let col = 0; col < 53; col++) {
-                    const weekStartDate = new Date(startDate);
-                    weekStartDate.setDate(weekStartDate.getDate() + (col * 7));
-
-                    if (weekStartDate.getMonth() !== currentMonth) {
-                        currentMonth = weekStartDate.getMonth();
-                        const monthLabel = document.createElement('div');
-                        monthLabel.className = 'month-label';
-                        monthLabel.textContent = this.months[currentMonth];
-                        monthLabel.style.gridColumn = `${col + 1}`;
-                        monthLabelsDiv.appendChild(monthLabel);
-                    }
-                }
-
-                // Render cells - GitHub layout: rows=days(7), columns=weeks(53)
-                // GitHub shows vertical days (Sun-Sat) as rows, horizontal weeks as columns
-                for (let row = 0; row < 7; row++) { // days of week (Sun=0, Sat=6)
-                    for (let col = 0; col < 53; col++) { // weeks
-                        const cell = document.createElement('div');
-
-                        // Calculate date for this cell (must match backend calculation exactly)
-                        const cellDate = new Date(startDate);
-                        cellDate.setDate(cellDate.getDate() + (col * 7) + row);
-
-                        // Get contribution data - backend returns array in exact same order
-                        // Array index = col * 7 + row (matching our grid calculation)
-                        const contributionIndex = col * 7 + row;
-                        const contribution = this.contributions[contributionIndex] || {
-                            date: cellDate.toISOString().split('T')[0],
-                            contributionCount: 0
-                        };
-
-                        // Verify date alignment (debug log for first few cells)
-                        if (col % 10 === 0 && row === 0) {
-                            const cellDateStr = cellDate.toISOString().split('T')[0];
-                            console.log(`Frontend Grid[${col}][${row}]: Cell date ${cellDateStr}, API date: ${contribution.date}, Match: ${cellDateStr === contribution.date}`);
-                        }
-
-                        // Check if future date
-                        const today = new Date();
-                        today.setHours(23, 59, 59, 999);
-                        const isFutureDate = cellDate > today;
-
-                        const level = this.getContributionLevel(contribution);
-                        let cellClasses = `grid-cell contribution-level-${level}`;
-
-                        if (isFutureDate) {
-                            cellClasses += ' future-date';
-                        } else if (this.pattern[col][row]) {
-                            cellClasses += ' selection-active';
-                        }
-
-                        cell.className = cellClasses;
-                        cell.setAttribute('data-col', col);
-                        cell.setAttribute('data-row', row);
-
-                        // Accessibility attributes
-                        cell.setAttribute('role', 'button');
-                        cell.setAttribute('tabindex', isFutureDate ? '-1' : '0');
-                        cell.setAttribute('aria-label', this.createCellAriaLabel(cellDate, contribution, this.pattern[col][row], isFutureDate));
-                        cell.setAttribute('aria-describedby', `tooltip-${col}-${row}`);
-
-                        // Position in CSS grid: GitHub layout
-                        cell.style.gridColumn = `${col + 1}`;
-                        cell.style.gridRow = `${row + 1}`;
-
-                        const tooltip = this.createTooltip(cellDate, contribution, this.pattern[col][row], isFutureDate);
-                        tooltip.id = `tooltip-${col}-${row}`;
-                        tooltip.setAttribute('role', 'tooltip');
-                        cell.appendChild(tooltip);
-
-                        // Event listeners
-                        if (!isFutureDate) {
-                            cell.addEventListener('click', (e) => {
-                                const col = parseInt(e.currentTarget.getAttribute('data-col'));
-                                const row = parseInt(e.currentTarget.getAttribute('data-row'));
-                                this.toggleCell(col, row);
-                            });
-
-                            // Keyboard navigation
-                            cell.addEventListener('keydown', (e) => {
-                                const col = parseInt(e.currentTarget.getAttribute('data-col'));
-                                const row = parseInt(e.currentTarget.getAttribute('data-row'));
-
-                                switch (e.key) {
-                                    case 'Enter':
-                                    case ' ':
-                                        e.preventDefault();
-                                        this.toggleCell(col, row);
-                                        break;
-                                    case 'ArrowRight':
-                                        e.preventDefault();
-                                        this.focusCell(col + 1, row);
-                                        break;
-                                    case 'ArrowLeft':
-                                        e.preventDefault();
-                                        this.focusCell(col - 1, row);
-                                        break;
-                                    case 'ArrowDown':
-                                        e.preventDefault();
-                                        this.focusCell(col, row + 1);
-                                        break;
-                                    case 'ArrowUp':
-                                        e.preventDefault();
-                                        this.focusCell(col, row - 1);
-                                        break;
-                                }
-                            });
-                        }
-
-                        cell.addEventListener('mouseenter', (e) => {
-                            const tooltip = e.currentTarget.querySelector('.tooltip');
-                            if (tooltip) {
-                                tooltip.style.opacity = '1';
-                                tooltip.style.zIndex = '1000';
-                            }
-                        });
-
-                        cell.addEventListener('mouseleave', (e) => {
-                            const tooltip = e.currentTarget.querySelector('.tooltip');
-                            if (tooltip) {
-                                tooltip.style.opacity = '0';
-                                tooltip.style.zIndex = 'auto';
-                            }
-                        });
-
-                        this.grid.appendChild(cell);
-                    }
-                }
-            }
-
-            getContributionLevel(contribution) {
-                if (!contribution) return 0;
-                const count = contribution.contributionCount;
-                if (count >= 15) return 4;
-                if (count >= 10) return 3;
-                if (count >= 5) return 2;
-                if (count > 0) return 1;
-                return 0;
-            }
-
-            createCellAriaLabel(date, contribution, isSelected, isFutureDate) {
-                const dayName = this.weekdays[date.getDay()];
-                const dateStr = date.toLocaleDateString('en-US', {
-                    month: 'long',
-                    day: 'numeric',
-                    year: 'numeric'
-                });
-
-                let label = `${dayName}, ${dateStr}`;
-
-                if (isFutureDate) {
-                    label += ', future date, not selectable';
-                } else {
-                    if (contribution?.contributionCount > 0) {
-                        label += `, ${contribution.contributionCount} contribution${contribution.contributionCount === 1 ? '' : 's'}`;
-                    } else {
-                        label += ', no contributions';
-                    }
-
-                    if (isSelected) {
-                        label += ', selected for new commit';
-                    }
-
-                    label += '. Press Enter or Space to toggle.';
-                }
-
-                return label;
-            }
-
-            focusCell(col, row) {
-                // Ensure coordinates are within bounds
-                if (col < 0 || col >= 53 || row < 0 || row >= 7) return;
-
-                const cell = this.grid.querySelector(`[data-col="${col}"][data-row="${row}"]`);
-                if (cell && cell.getAttribute('tabindex') !== '-1') {
-                    cell.focus();
-                }
-            }
-
-            createTooltip(date, contribution, isSelected, isFutureDate = false) {
-                const tooltip = document.createElement('div');
-                tooltip.className = 'tooltip';
-
-                let content = `${this.weekdays[date.getDay()]}, ${date.toLocaleDateString('en-US', {
-                    month: 'long',
-                    day: 'numeric',
-                    year: 'numeric'
-                })}`;
-
-                if (isFutureDate) {
-                    content += '\nFuture date';
-                } else {
-                    if (contribution?.contributionCount > 0) {
-                        content += `\n${contribution.contributionCount} contribution${contribution.contributionCount === 1 ? '' : 's'}`;
-                    }
-                    if (isSelected) {
-                        content += '\nSelected for new commit';
-                    }
-                }
-
-                tooltip.textContent = content;
-                return tooltip;
-            }
-
-            toggleCell(col, row) {
-                const date = this.getCellDate(col, row);
-                const today = new Date();
-                today.setHours(23, 59, 59, 999);
-
-                // Don't allow toggling future dates
-                if (date > today) {
-                    return;
-                }
-
-                this.pattern[col][row] = !this.pattern[col][row];
-                const cell = this.grid.querySelector(`[data-col="${col}"][data-row="${row}"]`);
-                cell.classList.toggle('selection-active');
-
-                const tooltip = cell.querySelector('.tooltip');
-                const contribution = this.contributions[col * 7 + row];
-                tooltip.textContent = this.createTooltip(date, contribution, this.pattern[col][row], false).textContent;
-
-                // Update aria-label for accessibility
-                cell.setAttribute('aria-label', this.createCellAriaLabel(date, contribution, this.pattern[col][row], false));
-            }
-
-            getCellDate(col, row) {
-                // Performance optimization: use cache for date calculations
-                const cacheKey = `${col}-${row}`;
-                if (this.dateCache.has(cacheKey)) {
-                    return this.dateCache.get(cacheKey);
-                }
-
-                // Use the same calculation as backend
-                const now = new Date();
-
-                // Calculate the start date: go back exactly 364 days (52 weeks) and find the Sunday
-                let startDate = new Date(now);
-                startDate.setDate(startDate.getDate() - 364);
-
-                // Find the Sunday on or before this date
-                while (startDate.getDay() !== 0) { // 0 = Sunday
-                    startDate.setDate(startDate.getDate() - 1);
-                }
-
-                const date = new Date(startDate);
-                date.setDate(date.getDate() + (col * 7) + row);
-
-                // Cache the result
-                this.dateCache.set(cacheKey, date);
-                return date;
-            }
-
-            async fetchContributions() {
-                if (this.isLoading) return;
-
-                this.isLoading = true;
-                this.showLoadingState(true);
-
-                try {
-                    const url = new URL('/api/contributions', window.location.origin);
-                    url.searchParams.set('timezone', this.userTimezone);
-
-                    const response = await fetch(url);
-                    if (!response.ok) throw new Error('Failed to fetch contributions');
-
-                    this.contributions = await response.json();
-
-                    // Cache contribution data for performance
-                    this.contributionCache.clear();
-                    this.contributions.forEach((contrib, index) => {
-                        this.contributionCache.set(index, contrib);
-                    });
-
-                    this.renderGrid();
-                } catch (error) {
-                    console.error('Failed to fetch contributions:', error);
-                    this.showFlashMessage('Failed to load contribution data. Please try refreshing the page.', 'error');
-                } finally {
-                    this.isLoading = false;
-                    this.showLoadingState(false);
-                }
-            }
-
-            showLoadingState(show) {
-                if (show) {
-                    this.grid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: var(--color-fg-muted);">Loading contribution data...</div>';
-                }
-            }
-
-            async createPattern() {
-                if (this.isSubmitting) return;
-
-                const repoName = this.repoNameInput.value.trim();
-                if (!this.validateRepoName(repoName)) return;
-
-                await this.submitPattern(repoName);
-            }
-
-            validateRepoName(repoName) {
-                if (!repoName) {
-                    this.showFlashMessage('Please enter a repository name', 'error');
-                    return false;
-                }
-                if (!/^[a-zA-Z0-9_-]+$/.test(repoName)) {
-                    this.showFlashMessage('Repository name can only contain letters, numbers, hyphens, and underscores', 'error');
-                    return false;
-                }
-                return true;
-            }
-
-            async submitPattern(repoName) {
-                this.isSubmitting = true;
-                this.createButton.disabled = true;
-                const originalButtonText = this.createButton.textContent;
-                this.createButton.innerHTML = '<div class="loading-spinner"></div>Creating Pattern...';
-
-                try {
-                    const response = await fetch('/api/commits', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-Timezone': this.userTimezone
-                        },
-                        body: JSON.stringify({
-                            pattern: this.pattern,
-                            repoName: repoName,
-                            timezone: this.userTimezone
-                        })
-                    });
-
-                    if (!response.ok) {
-                        const error = await response.json();
-                        throw new Error(error.error || 'Failed to create pattern');
-                    }
-
-                    const result = await response.json();
-                    this.repoNameInput.value = '';
-                    this.pattern = Array(53).fill().map(() => Array(7).fill(false));
-                    await this.fetchContributions();
-
-                    let message = 'Pattern created successfully! Check your GitHub profile.';
-                    if (result.repository) {
-                        message += ` Repository: ${result.repository}`;
-                    }
-                    this.showFlashMessage(message);
-
-                } catch (error) {
-                    this.showFlashMessage(error.message, 'error');
-                } finally {
-                    this.isSubmitting = false;
-                    this.createButton.disabled = false;
-                    this.createButton.textContent = originalButtonText;
-                }
-            }
-        }
-
-        class Auth {
-            constructor() {
-                this.isAuthenticated = false;
-                this.username = null;
-                this.authSection = document.getElementById('authSection');
-                this.landingPage = document.getElementById('landingPage');
-                this.mainApp = document.getElementById('mainApp');
-            }
-
-            async checkAuthStatus() {
-                try {
-                    const response = await fetch('/api/auth/status');
-                    const data = await response.json();
-                    this.isAuthenticated = data.authenticated;
-                    this.username = data.username;
-                    this.updateUI();
-                    return data.authenticated;
-                } catch (error) {
-                    console.error('Auth status check failed:', error);
-                    return false;
-                }
-            }
-
-            updateUI() {
-                if (this.isAuthenticated) {
-                    this.authSection.innerHTML = `
-                <span class="username">Welcome, ${this.username}</span>
-                <button onclick="auth.logout()" class="btn btn-secondary">Logout</button>
-            `;
-                    this.landingPage.style.display = 'none';
-                    this.mainApp.style.display = 'block';
-                } else {
-                    this.authSection.innerHTML = `
-                <a href="/login" class="btn btn-primary">Login with GitHub</a>
-            `;
-                    this.landingPage.style.display = 'block';
-                    this.mainApp.style.display = 'none';
-                }
-            }
-
-            async logout() {
-                try {
-                    await fetch('/logout', { method: 'POST' });
-                    window.location.reload();
-                } catch (error) {
-                    console.error('Logout failed:', error);
-                }
-            }
-        }
-
-        const auth = new Auth();
-        const commitCanvas = new CommitCanvas();
-
-        document.addEventListener('DOMContentLoaded', async () => {
-            const isAuthenticated = await auth.checkAuthStatus();
-            if (isAuthenticated) {
-                commitCanvas.init();
-            }
-        });
-    </script>
-</body>
-
-</html>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="demo-cell"></div>
+                    <div class="
