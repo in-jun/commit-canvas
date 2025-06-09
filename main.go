@@ -592,19 +592,7 @@ func createCommits(c *gin.Context) {
 			return
 		}
 
-		// Create and checkout commit-canvas branch first
-		checkoutOpts := &git.CheckoutOptions{
-			Branch: plumbing.NewBranchReferenceName("commit-canvas"),
-			Create: true,
-		}
-
-		if err := w.Checkout(checkoutOpts); err != nil {
-			log.Printf("Failed to create and checkout commit-canvas branch: %v", err)
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create commit-canvas branch"})
-			return
-		}
-
-		// Create initial README on commit-canvas branch
+		// Create initial README
 		readmeContent := fmt.Sprintf(`# %s
 
 This repository was created by [Commit Canvas](https://github.com/in-jun/commit-canvas) - a tool for designing GitHub contribution graphs.
@@ -632,7 +620,7 @@ Generated on: %s
 			return
 		}
 
-		// Create initial commit on commit-canvas branch
+		// Create initial commit
 		if _, err := w.Commit("Initial commit", &git.CommitOptions{
 			Author: &object.Signature{
 				Name:  userSession.Username,
@@ -650,7 +638,22 @@ Generated on: %s
 			return
 		}
 
-		// Push commit-canvas branch
+		// Create and push commit-canvas branch
+		headRef, err := repo.Head()
+		if err != nil {
+			log.Printf("Failed to get HEAD: %v", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get HEAD reference"})
+			return
+		}
+
+		ref := plumbing.NewHashReference(plumbing.NewBranchReferenceName("commit-canvas"), headRef.Hash())
+		if err = repo.Storer.SetReference(ref); err != nil {
+			log.Printf("Failed to set commit-canvas branch: %v", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to set commit-canvas branch"})
+			return
+		}
+
+		// Push initial commit
 		if err := repo.Push(&git.PushOptions{
 			RemoteName: "origin",
 			Auth:       auth,
@@ -681,7 +684,7 @@ Generated on: %s
 		return nil
 	})
 
-	// Checkout or create commit-canvas branch
+	// Checkout commit-canvas branch
 	checkoutOpts := &git.CheckoutOptions{
 		Branch: plumbing.NewBranchReferenceName("commit-canvas"),
 		Create: !branchExists,
