@@ -550,6 +550,11 @@
             width: fit-content;
             align-content: start;
             justify-content: start;
+            /* Prevent text selection during drag */
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
         }
 
         .grid-cell {
@@ -567,6 +572,11 @@
             /* Accessibility improvements */
             outline: 2px solid transparent;
             outline-offset: 1px;
+            /* Prevent text selection during drag */
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
         }
 
         .grid-cell:hover {
@@ -1055,6 +1065,11 @@
                 this.dateCache = new Map();
                 this.contributionCache = new Map();
                 this.isLoading = false;
+
+                // Drag selection state
+                this.isDragging = false;
+                this.dragStartState = null; // true for selecting, false for deselecting
+                this.lastDraggedCell = null;
             }
 
             detectTimezone() {
@@ -1081,6 +1096,19 @@
                 });
                 this.grid.addEventListener('mouseleave', () => {
                     document.querySelectorAll('.tooltip').forEach(tooltip => tooltip.style.opacity = '0');
+                });
+
+                // Global mouse events for drag selection
+                document.addEventListener('mouseup', () => {
+                    this.isDragging = false;
+                    this.dragStartState = null;
+                    this.lastDraggedCell = null;
+                });
+
+                document.addEventListener('mousemove', (e) => {
+                    if (this.isDragging) {
+                        e.preventDefault(); // Prevent text selection while dragging
+                    }
                 });
             }
 
@@ -1205,10 +1233,35 @@
 
                         // Event listeners
                         if (!isFutureDate) {
-                            cell.addEventListener('click', (e) => {
+                            // Mouse down to start drag selection
+                            cell.addEventListener('mousedown', (e) => {
+                                e.preventDefault(); // Prevent text selection
                                 const col = parseInt(e.currentTarget.getAttribute('data-col'));
                                 const row = parseInt(e.currentTarget.getAttribute('data-row'));
-                                this.toggleCell(col, row);
+                                this.startDragSelection(col, row);
+                            });
+
+                            // Mouse enter for drag selection
+                            cell.addEventListener('mouseenter', (e) => {
+                                const col = parseInt(e.currentTarget.getAttribute('data-col'));
+                                const row = parseInt(e.currentTarget.getAttribute('data-row'));
+                                this.handleDragSelection(col, row);
+
+                                // Tooltip handling
+                                const tooltip = e.currentTarget.querySelector('.tooltip');
+                                if (tooltip) {
+                                    tooltip.style.opacity = '1';
+                                    tooltip.style.zIndex = '1000';
+                                }
+                            });
+
+                            // Click for single toggle (when not dragging)
+                            cell.addEventListener('click', (e) => {
+                                if (!this.isDragging) {
+                                    const col = parseInt(e.currentTarget.getAttribute('data-col'));
+                                    const row = parseInt(e.currentTarget.getAttribute('data-row'));
+                                    this.toggleCell(col, row);
+                                }
                             });
 
                             // Keyboard navigation
@@ -1241,14 +1294,6 @@
                                 }
                             });
                         }
-
-                        cell.addEventListener('mouseenter', (e) => {
-                            const tooltip = e.currentTarget.querySelector('.tooltip');
-                            if (tooltip) {
-                                tooltip.style.opacity = '1';
-                                tooltip.style.zIndex = '1000';
-                            }
-                        });
 
                         cell.addEventListener('mouseleave', (e) => {
                             const tooltip = e.currentTarget.querySelector('.tooltip');
@@ -1348,10 +1393,67 @@
                 }
 
                 this.pattern[col][row] = !this.pattern[col][row];
-                const cell = this.grid.querySelector(`[data-col="${col}"][data-row="${row}"]`);
-                cell.classList.toggle('selection-active');
+                this.updateCellDisplay(col, row);
+            }
 
+            startDragSelection(col, row) {
+                const date = this.getCellDate(col, row);
+                const today = new Date();
+                today.setHours(23, 59, 59, 999);
+
+                // Don't allow dragging on future dates
+                if (date > today) {
+                    return;
+                }
+
+                this.isDragging = true;
+                this.dragStartState = !this.pattern[col][row]; // Determine if we're selecting or deselecting
+                this.lastDraggedCell = { col, row };
+
+                // Apply the state to the starting cell
+                this.pattern[col][row] = this.dragStartState;
+                this.updateCellDisplay(col, row);
+            }
+
+            handleDragSelection(col, row) {
+                if (!this.isDragging) return;
+
+                const date = this.getCellDate(col, row);
+                const today = new Date();
+                today.setHours(23, 59, 59, 999);
+
+                // Don't allow selecting future dates
+                if (date > today) {
+                    return;
+                }
+
+                // Avoid redundant updates
+                if (this.lastDraggedCell && this.lastDraggedCell.col === col && this.lastDraggedCell.row === row) {
+                    return;
+                }
+
+                this.lastDraggedCell = { col, row };
+
+                // Apply the drag state (consistent selection or deselection)
+                if (this.pattern[col][row] !== this.dragStartState) {
+                    this.pattern[col][row] = this.dragStartState;
+                    this.updateCellDisplay(col, row);
+                }
+            }
+
+            updateCellDisplay(col, row) {
+                const cell = this.grid.querySelector(`[data-col="${col}"][data-row="${row}"]`);
+                if (!cell) return;
+
+                if (this.pattern[col][row]) {
+                    cell.classList.add('selection-active');
+                } else {
+                    cell.classList.remove('selection-active');
+                }
+
+                // Update tooltip
                 const tooltip = cell.querySelector('.tooltip');
+                const date = this.getCellDate(col, row);
                 const contribution = this.contributions[col * 7 + row];
                 tooltip.textContent = this.createTooltip(date, contribution, this.pattern[col][row], false).textContent;
 
