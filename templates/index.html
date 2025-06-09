@@ -1242,8 +1242,6 @@
                                 const row = parseInt(e.currentTarget.getAttribute('data-row'));
                                 this.mouseDownCell = { col, row };
                                 this.hasDraggedAway = false;
-
-                                console.log('Mouse down:', { col, row });
                             });
 
                             // Mouse enter for drag selection
@@ -1254,7 +1252,6 @@
                                 // If mouse is down and we're entering a different cell, start dragging
                                 if (this.mouseDownCell &&
                                     (this.mouseDownCell.col !== col || this.mouseDownCell.row !== row)) {
-                                    console.log('Drag detected - entering different cell:', { col, row, mouseDownCell: this.mouseDownCell });
                                     if (!this.isDragging) {
                                         this.startDragSelection(this.mouseDownCell.col, this.mouseDownCell.row);
                                     }
@@ -1274,13 +1271,6 @@
                             cell.addEventListener('click', (e) => {
                                 const col = parseInt(e.currentTarget.getAttribute('data-col'));
                                 const row = parseInt(e.currentTarget.getAttribute('data-row'));
-
-                                console.log('Click event:', {
-                                    col, row,
-                                    hasDraggedAway: this.hasDraggedAway,
-                                    mouseDownCell: this.mouseDownCell,
-                                    isDragging: this.isDragging
-                                });
 
                                 // Toggle if we haven't dragged away OR if no mouse down was tracked (simple click)
                                 if (!this.hasDraggedAway) {
