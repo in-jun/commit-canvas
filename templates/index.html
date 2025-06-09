@@ -1070,6 +1070,8 @@
                 this.isDragging = false;
                 this.dragStartState = null; // true for selecting, false for deselecting
                 this.lastDraggedCell = null;
+                this.mouseDownCell = null; // Track mouse down position
+                this.hasDraggedAway = false; // Track if mouse has moved away from initial cell
             }
 
             detectTimezone() {
@@ -1103,6 +1105,8 @@
                     this.isDragging = false;
                     this.dragStartState = null;
                     this.lastDraggedCell = null;
+                    this.mouseDownCell = null;
+                    this.hasDraggedAway = false;
                 });
 
                 document.addEventListener('mousemove', (e) => {
@@ -1229,23 +1233,31 @@
                         const tooltip = this.createTooltip(cellDate, contribution, this.pattern[col][row], isFutureDate);
                         tooltip.id = `tooltip-${col}-${row}`;
                         tooltip.setAttribute('role', 'tooltip');
-                        cell.appendChild(tooltip);
-
-                        // Event listeners
+                        cell.appendChild(tooltip);                        // Event listeners
                         if (!isFutureDate) {
-                            // Mouse down to start drag selection
+                            // Mouse down to start potential drag selection
                             cell.addEventListener('mousedown', (e) => {
                                 e.preventDefault(); // Prevent text selection
                                 const col = parseInt(e.currentTarget.getAttribute('data-col'));
                                 const row = parseInt(e.currentTarget.getAttribute('data-row'));
-                                this.startDragSelection(col, row);
+                                this.mouseDownCell = { col, row };
+                                this.hasDraggedAway = false;
                             });
 
                             // Mouse enter for drag selection
                             cell.addEventListener('mouseenter', (e) => {
                                 const col = parseInt(e.currentTarget.getAttribute('data-col'));
                                 const row = parseInt(e.currentTarget.getAttribute('data-row'));
-                                this.handleDragSelection(col, row);
+
+                                // If mouse is down and we're entering a different cell, start dragging
+                                if (this.mouseDownCell &&
+                                    (this.mouseDownCell.col !== col || this.mouseDownCell.row !== row)) {
+                                    if (!this.isDragging) {
+                                        this.startDragSelection(this.mouseDownCell.col, this.mouseDownCell.row);
+                                    }
+                                    this.hasDraggedAway = true;
+                                    this.handleDragSelection(col, row);
+                                }
 
                                 // Tooltip handling
                                 const tooltip = e.currentTarget.querySelector('.tooltip');
@@ -1257,9 +1269,12 @@
 
                             // Click for single toggle (when not dragging)
                             cell.addEventListener('click', (e) => {
-                                if (!this.isDragging) {
-                                    const col = parseInt(e.currentTarget.getAttribute('data-col'));
-                                    const row = parseInt(e.currentTarget.getAttribute('data-row'));
+                                const col = parseInt(e.currentTarget.getAttribute('data-col'));
+                                const row = parseInt(e.currentTarget.getAttribute('data-row'));
+
+                                // Only toggle if we haven't dragged away from the original cell
+                                if (!this.hasDraggedAway && this.mouseDownCell &&
+                                    this.mouseDownCell.col === col && this.mouseDownCell.row === row) {
                                     this.toggleCell(col, row);
                                 }
                             });
