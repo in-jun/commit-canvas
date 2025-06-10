@@ -10,7 +10,7 @@
 
 Transform your GitHub contribution graph into beautiful patterns and designs. Create meaningful art with your commits while maintaining a professional developer profile.
 
-[**🚀 Try it now**](https://commit-canvas.ijw.app) | [**📖 Documentation**](#documentation) | [**🤝 Contributing**](#contributing)
+[**🚀 Try it now**](https://commit-canvas.injun.dev) | [**📖 Documentation**](#documentation) | [**🤝 Contributing**](#contributing)
 
 </div>
 
@@ -50,7 +50,7 @@ Transform your GitHub contribution graph into beautiful patterns and designs. Cr
 1. **Visit the Application**
 
    ```
-   https://commit-canvas.ijw.app
+   https://commit-canvas.injun.dev
    ```
 
 2. **Authenticate with GitHub**
